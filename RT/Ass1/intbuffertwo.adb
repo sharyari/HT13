@@ -22,32 +22,31 @@ procedure Intbuffertwo is
       entry Read(I : out Integer);
       entry Write(I : Integer);
    private
-      --function Pread return Integer;
-      --procedure Pwrite(I : Integer);
-      B : Buffer_Array;
-      PW : Integer := 0;
-      PR : Integer := 0;
-      D : Integer := 0;
-      Q : Boolean := False;
+      B : Buffer_Array; -- Array to represent cyclic buffer
+      PW : Integer := 0; -- Write pointer
+      PR : Integer := 0; -- Read pointer
+      D : Integer := 0; -- Number of readable elements in buffer
+      L : Integer := 20; -- The length of the cyclic buffer
+      Q : Boolean := False; -- End task when Q = true
    end Buffer;
    
    protected body Buffer is
       
       entry Write(I : Integer) 
-      when D < 20 is
+      when D < L is
       begin
 	 B(PW) := I;
-	 Put_Line("  Buffer: Writing " & Integer'Image(I) & " at position " & Integer'Image(PW) & "");
-	 PW := (PW + 1) mod 20;
+	 -- Put_Line("  Buffer: Writing " & Integer'Image(I) & " at position " & Integer'Image(PW) & "");
+	 PW := (PW + 1) mod L;
 	 D := D + 1;
       end Write;
       
       entry Read(I : out Integer) --return Integer
       when D /= 0 is
       begin
-	 Put_Line("  Buffer: Reading " & Integer'Image(B(PR)) & " from position " & Integer'Image(PR) & "");
+	 -- Put_Line("  Buffer: Reading " & Integer'Image(B(PR)) & " from position " & Integer'Image(PR) & "");
 	 I:= B(PR);	 
-	 PR := (PR + 1) mod 20;
+	 PR := (PR + 1) mod L;
 	 D := D - 1;
       end Read;	 
    end Buffer;
