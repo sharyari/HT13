@@ -4,16 +4,16 @@ with Ada.Calendar; use Ada.Calendar;
 with Ada.Numerics.Discrete_Random;-- use Ada.Numerics.Float_Random;
 
 procedure CyclicTwo is
-   subtype F3ET is Integer range 1000 .. 7000 ; 
+   subtype F3ET is Integer range 1000 .. 7000;
    package DIO is new Ada.Text_Io.Fixed_Io(Duration);
-   package Random_Execution_Time is new Ada.Numerics.Discrete_Random (F3ET);
+   package Random_Execution_Time is new Ada.Numerics.Discrete_Random(F3ET);
    use Random_Execution_Time;
    
    G : Generator;
    T : Time := Clock;
    ST : Time := T;
    F3Flip : Boolean := True;
-   
+
    task type Watchdog is
       entry F3Begin;
       entry F3End;
@@ -32,26 +32,26 @@ procedure CyclicTwo is
    procedure F3 is
    begin
       Put("In F3. Start time is "); Put(Duration'Image(Clock-ST)); Put_Line("");
-      delay until (Clock+Duration(Float(Random(G))/10000.0));
+      delay Duration(Float(Random(G)) / 10000.0);
       Put("In F3. End time is "); Put(Duration'Image(Clock-ST)); Put_Line("");
    end F3;
+
    task body Watchdog is
    begin
       loop
 	 accept F3Begin do
 	    Put_Line("Watching F3.");   
-	 end F3Begin; 
-	 select when (True) =>
+	 end F3Begin;
+	 select
 	    delay 0.5;
 	    -- F3 took too long to finish, write a warning and increase the delay until the
 	    -- next second.
-	    Put("Warning! F3 went over its budget");
-	    Put(Duration'Image(Clock-ST)); Put_Line("");
+	    Put("Warning! F3 went over its budget" & Duration'Image(Clock-ST)); Put_Line("");
 	    T := T + 1.0;
 	    accept F3End do
 	       Put_Line("F3 done");	    
 	    end F3End;
-	 or
+	 or 
 	    accept F3End do
 	       Put_Line("F3 done");	    
 	    end F3End;
@@ -61,9 +61,9 @@ procedure CyclicTwo is
 begin
    Reset(G);
    loop 
+      T := T + 1.0;
       F1;
       F2;
-      T := T + 1.0;
       if F3Flip = True then
 	 delay until (T-0.5);
 	 F3Watchdog.F3Begin;
