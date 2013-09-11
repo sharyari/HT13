@@ -1,0 +1,206 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{fullpage}
+\usepackage[british]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+%\usepackage{amsthm} \newtheorem{theorem}{Theorem}
+\usepackage{color}
+\usepackage{float}
+%\usepackage{todonotes}
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+
+\usepackage{alltt}
+\usepackage{listings}
+ \usepackage{aeguill}
+\usepackage{dsfont}
+%\usepackage{algorithm}
+%\usepackage[noend]{algorithm2e}
+%\usepackage{algorithmicx}
+\usepackage{subfig}
+\lstset{% parameters for all code listings
+language=ada,
+frame=single,
+basicstyle=\small, % nothing smaller than \footnotesize, please
+tabsize=2,
+numbers=left,
+ framexleftmargin=2em, % extend frame to include line numbers
+xrightmargin=2em, % extra space to fit 79 characters
+breaklines=true,
+breakatwhitespace=true,
+prebreak={/},
+captionpos=b,
+columns=fullflexible,
+escapeinside={\#*}{\^^M}
+}
+
+
+% Alter some LaTeX defaults for better treatment of figures:
+    % See p.105 of "TeX Unbound" for suggested values.
+    % See pp. 199-200 of Lamport's "LaTeX" book for details.
+    % General parameters, for ALL pages:
+    \renewcommand{\topfraction}{0.9}	% max fraction of floats at top
+    \renewcommand{\bottomfraction}{0.8}	% max fraction of floats at bottom
+    % Parameters for TEXT pages (not float pages):
+    \setcounter{topnumber}{2}
+    \setcounter{bottomnumber}{2}
+    \setcounter{totalnumber}{4} % 2 may work better
+    \setcounter{dbltopnumber}{2} % for 2-column pages
+    \renewcommand{\dbltopfraction}{0.9}	% fit big float above 2-col. text
+    \renewcommand{\textfraction}{0.07}	% allow minimal text w. figs
+    % Parameters for FLOAT pages (not text pages):
+    \renewcommand{\floatpagefraction}{0.7}	% require fuller float pages
+% N.B.: floatpagefraction MUST be less than topfraction !!
+    \renewcommand{\dblfloatpagefraction}{0.7}	% require fuller float pages
+
+% remember to use [htp] or [htpb] for placement
+
+
+\usepackage{fancyvrb}
+%\DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\small}
+%\DefineVerbatimEnvironment{example}{Verbatim}{fontsize=\small}
+
+\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+\noindent\keywordname\enspace\ignorespaces#1}
+
+
+\usepackage{tikz} \usetikzlibrary{trees}
+\usepackage{hyperref} % should always be the last package
+
+% useful colours (use sparingly!):
+\newcommand{\blue}[1]{{\color{blue}#1}}
+\newcommand{\green}[1]{{\color{green}#1}}
+\newcommand{\red}[1]{{\color{red}#1}}
+
+% useful wrappers for algorithmic/Python notation:
+\newcommand{\length}[1]{\text{len}(#1)}
+\newcommand{\twodots}{\mathinner{\ldotp\ldotp}} % taken from clrscode3e.sty
+\newcommand{\Oh}[1]{\mathcal{O}\left(#1\right)}
+
+% useful (wrappers for) math symbols:
+\newcommand{\Cardinality}[1]{\left\lvert#1\right\rvert}
+%\newcommand{\Cardinality}[1]{\##1}
+\newcommand{\Ceiling}[1]{\left\lceil#1\right\rceil}
+\newcommand{\Floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand{\Iff}{\Leftrightarrow}
+\newcommand{\Implies}{\Rightarrow}
+\newcommand{\Intersect}{\cap}
+\newcommand{\Sequence}[1]{\left[#1\right]}
+\newcommand{\Set}[1]{\left\{#1\right\}}
+\newcommand{\SetComp}[2]{\Set{#1\SuchThat#2}}
+\newcommand{\SuchThat}{\mid}
+\newcommand{\Tuple}[1]{\langle#1\rangle}
+\newcommand{\Union}{\cup}
+\usetikzlibrary{positioning,shapes,shadows,arrows}
+
+\usepackage{url}
+
+
+\pagestyle{empty}
+
+\title{Realtime Systems - Fall 2013 \\ \textbf{Lab 1 Report}}
+
+\author{Bjorn Forsberg, Jonathan Sharyari, Daniel Tibbing}
+
+\begin{document}
+
+\maketitle
+
+\section{Part 1: Cyclic Scheduler}
+
+The first part of this lab was to implement a cyclic scheduler, in which three procedures were run in a specific order.
+
+The scheduling algorithm looked like this:
+
+\[
+\begin{tabular}{l | l }
+  Procedure name & Start time  \\
+  \hline
+  F1 & At the start of every second \\
+  F2 & When F1 finishes. \\
+  F3 & 0.5 s after the start of F1 every other second.
+\end{tabular}
+\]
+
+It was given that the execution of both \emph{F1} and \emph{F2} took less than 0.5 seconds. Each task should print its start time with a resolution of at least $\frac{1}{1000}$ s.
+
+\subsection{Code}
+
+\begin{lstlisting}
+  with something; use something;
+
+  procedure tomten is
+    C : Integer := hejsan;
+  begin
+    loop
+      null;
+    end loop;
+  end tomten;
+\end{lstlisting}
+
+\subsection{Printouts}
+
+\begin{lstlisting}[language=Bash]
+  hej@celsius> hejsan
+  hoppsan thea sjdks 
+  a a a 
+\end{lstlisting}
+
+\section{Part 2: Cyclic Scheduler with Watch-dogs}
+
+The second part of the lab was to expand the code from the first part to make \emph{F3} occasionally take more than its budgeted 0.5 s to finish. A watch-dog should be implemented which produced a warning when \emph{F3} exceeded its budgeted time. When this occurrs, the scheduler should re-synchronize \emph{F1} to start at a whole second again.
+
+\subsection{Code}
+
+\begin{lstlisting}
+
+\end{lstlisting}
+
+\subsection{Printouts}
+
+\begin{lstlisting}[language=Bash]
+
+\end{lstlisting}
+
+\section{Part 3: Process Communication}
+
+The goal of the third part of the lab was to implement a FIFO buffer that holds at least 10 elements. The FIFO buffer should be implemented in its own task, and there should be a Consumer and a Producer task that read and wrote data to the buffer using interprocess communication.
+
+The producer should produce a number between 0 and 25 and write it to the buffer at irregular intervals. The consumer should read data from the buffer at irregular intervals. If the buffer is full, the value the producer is trying to add should not be discarded, and likewise, if the buffer is empty the reader must wait for data to be available to eliminate the risk of buffer over- and underflow. The consumer should add the values read and terminate itself and the other tasks when the sum is larger than 100.
+
+In our solution we implemented a circular buffer of length 20 to hold the buffered data.
+
+\subsection{Code}
+
+\begin{lstlisting}
+
+\end{lstlisting}
+
+\subsection{Printouts}
+
+\begin{lstlisting}[language=Bash]
+
+\end{lstlisting}
+
+\section{Part 4: Data Driven Synchronization}
+
+In the fourth part of the lab the code in Part 3 should be re-implemented using a protected shared object to hold the buffer, instead of using a separate task.
+
+\subsection{Code}
+
+\begin{lstlisting}
+
+\end{lstlisting}
+
+\subsection{Printouts}
+
+\begin{lstlisting}[language=Bash]
+
+\end{lstlisting}
+
+\end{document}
