@@ -132,23 +132,83 @@ It was given that the execution of both \emph{F1} and \emph{F2} took less than 0
 \subsection{Code}
 
 \begin{lstlisting}
-  with something; use something;
+  with Ada.Text_IO, Ada.Float_Text_IO;
+use Ada.Text_IO, Ada.Float_Text_IO;
+with Ada.Calendar; use Ada.Calendar;
 
-  procedure tomten is
-    C : Integer := hejsan;
-  begin
-    loop
-      null;
-    end loop;
-  end tomten;
+
+procedure Cyclic is
+   package DIO is new Ada.Text_Io.Fixed_Io(Duration);
+   T : Time := Clock; --The next whole second to run the schedule
+   ST : Time := T; --Start time (for outputs to make sense)
+   Flip : Boolean := True; --Flag to toggle if it is a second that F3 should be executed
+   
+   --Procedure that is executed at the start of every new second 
+   procedure F1 is
+   begin
+      Put("In F1. Current time is "); Put(Duration'Image(Clock-ST)); Put_Line("");   
+   end F1;
+   
+   --Procedure that starts as soon as F1 ends
+   procedure F2 is
+   begin
+      Put("In F2. Current time is "); Put(Duration'Image(Clock-ST)); Put_Line("");   
+   end F2;
+   
+   --Procedure that is executed every other second 0.5s after F1 started
+   procedure F3 is
+   begin
+      Put("In F3. Current time is "); Put(Duration'Image(Clock-ST)); Put_Line("");
+   end F3;
+begin
+   loop
+      --Set next time F1 should be executed 
+      T := T + 1.0;
+      --Run procedures	
+      F1;
+      F2;  
+      if Flip then --If second when F3 should be run
+	 delay until (T-0.5); --Set starting time for F3 to 0.5s after start of F1
+	 F3;
+      end if;
+      Flip := not Flip; --Toggle F3 execution
+      Put_Line("");
+      delay until T;
+   end loop;
+end Cyclic;
 \end{lstlisting}
 
 \subsection{Printouts}
 
 \begin{lstlisting}[language=Bash]
-  hej@celsius> hejsan
-  hoppsan thea sjdks 
-  a a a 
+  beurling> cyclic
+  In F1. Current time is  0.000062000
+  In F2. Current time is  0.000087000
+  In F3. Current time is  0.500104000
+
+  In F1. Current time is  1.000068000
+  In F2. Current time is  1.000085000
+  
+  In F1. Current time is  2.000055000
+  In F2. Current time is  2.000075000
+  In F3. Current time is  2.500041000
+  
+  In F1. Current time is  3.000045000
+  In F2. Current time is  3.000063000
+  
+  In F1. Current time is  4.000435000
+  In F2. Current time is  4.000455000
+  In F3. Current time is  4.500041000
+  
+  In F1. Current time is  5.000063000
+  In F2. Current time is  5.000084000
+  
+  In F1. Current time is  6.000063000
+  In F2. Current time is  6.000085000
+  In F3. Current time is  6.500049000
+  
+  In F1. Current time is  7.000047000
+  In F2. Current time is  7.000064000
 \end{lstlisting}
 
 \section{Part 2: Cyclic Scheduler with Watch-dogs}
@@ -158,13 +218,138 @@ The second part of the lab was to expand the code from the first part to make \e
 \subsection{Code}
 
 \begin{lstlisting}
+with Ada.Text_IO, Ada.Float_Text_IO;
+use Ada.Text_IO, Ada.Float_Text_IO;
+with Ada.Calendar; use Ada.Calendar;
+with Ada.Numerics.Discrete_Random;-- use Ada.Numerics.Float_Random;
+
+procedure CyclicTwo is
+   subtype F3ET is Integer range 1000 .. 7000;
+   package DIO is new Ada.Text_Io.Fixed_Io(Duration);
+   package Random_Execution_Time is new Ada.Numerics.Discrete_Random(F3ET);
+   use Random_Execution_Time;
+   
+   G : Generator; --Generator for creating random execution time
+   T : Time := Clock; --The next whole second to run the schedule
+   ST : Time := T; --Start time (for outputs to make sense)
+   F3Flip : Boolean := True; --Flag to toggle if it is a second that F3 should be executed
+   
+   --Task to monitor procedure F3's execution time
+   task type Watchdog is
+      entry F3Begin; --Start watching
+      entry F3End(B : out Boolean); --End watching, output wheter or not F3 missed deadline on B
+   end Watchdog;
+   
+   F3Watchdog : Watchdog;
+   
+   --Procedure that is executed at the start of every new second if F3 keeps deadline, otherwise skip a full second 
+   procedure F1 is
+   begin
+      Put("In F1. Current time is "); Put(Duration'Image(Clock-ST)); Put_Line("");   
+   end F1;
+   --Procedure that starts as soon as F1 ends
+   procedure F2 is
+   begin
+      Put("In F2. Current time is "); Put(Duration'Image(Clock-ST)); Put_Line("");   
+   end F2;
+   --Procedure that is executed every other second 0.5s after F1 started (randomly skips deadline of 0.5s)
+   procedure F3 is
+   begin
+      Put("In F3. Start time is "); Put(Duration'Image(Clock-ST)); Put_Line("");
+      delay Duration(Float(Random(G)) / 10000.0); --Delay for random execution time 
+      Put("In F3. End time is "); Put(Duration'Image(Clock-ST)); Put_Line("");
+   end F3;
+   
+   task body Watchdog is
+   begin
+      loop
+	 --Start watching procedure
+	 accept F3Begin do
+	    Put_Line("Watching F3.");   
+	 end F3Begin;
+	 select
+	    delay 0.5;
+	    -- F3 took too long to finish, write a warning and output that it missed its deadline
+	    Put("Warning! F3 went over its budget" & Duration'Image(Clock-ST)); Put_Line("");
+	    --Stop watching with missed deadline
+	    accept F3End(B : out Boolean) do
+	       Put_Line("F3 done");	  
+	       B := True; --Missed deadline 
+	    end F3End;
+	 or 
+	    --Stop watching with met deadline
+	    accept F3End(B : out Boolean) do
+	       Put_Line("F3 done");
+	       B := False; --Met deadline 	    
+	    end F3End;
+	 end select;
+      end loop;
+   end Watchdog;
+   B : Boolean := False; --Deadline flag
+begin
+   Reset(G); --Create new random execution time
+   loop 
+      --Set next time F1 should be executed 
+      T := T + 1.0;
+      --Run procedures	
+      F1;
+      F2;
+      if F3Flip then --If second when F3 should be run
+	 delay until (T-0.5); --Set starting time for F3 to 0.5s after start of F1
+	 F3Watchdog.F3Begin; --Start watchdog
+	 F3; --execute F3
+	 F3Watchdog.F3End(B); --End watchdog
+	 if B then --If missed deadline
+	    T := T + 1.0; --Set next execution time for F1 to the next second instead
+	    F3Flip := not F3Flip; -- Run F3 next round as well, since we skip one second.
+	 end if;
+      end if;
+      F3Flip := not F3Flip; --Toggle F3 run-second
+      Put_Line("");
+      delay until T;
+   end loop;
+end CyclicTwo;
 
 \end{lstlisting}
 
 \subsection{Printouts}
 
 \begin{lstlisting}[language=Bash]
-
+  beurling> cyclictwo 
+  In F1. Current time is  0.000915000
+  In F2. Current time is  0.000936000
+  Watching F3.
+  In F3. Start time is  0.500094000
+  Warning! F3 went over its budget 1.000287000
+  In F3. End time is  1.205856000
+  F3 done
+  
+  In F1. Current time is  2.000035000
+  In F2. Current time is  2.000051000
+  Watching F3.
+  In F3. Start time is  2.502777000
+  In F3. End time is  2.933850000
+  F3 done
+  
+  In F1. Current time is  3.000059000
+  In F2. Current time is  3.000080000
+  
+  In F1. Current time is  4.000047000
+  In F2. Current time is  4.000066000
+  Watching F3.
+  In F3. Start time is  4.502022000
+  In F3. End time is  4.825411000
+  F3 done
+  
+  In F1. Current time is  5.000074000
+  In F2. Current time is  5.000099000
+  
+  In F1. Current time is  6.000064000
+  In F2. Current time is  6.000089000
+  Watching F3.
+  In F3. Start time is  6.500280000
+  In F3. End time is  6.811574000
+  F3 done
 \end{lstlisting}
 
 \section{Part 3: Process Communication}
@@ -178,13 +363,157 @@ In our solution we implemented a circular buffer of length 20 to hold the buffer
 \subsection{Code}
 
 \begin{lstlisting}
+with Ada.Text_Io; use Ada.Text_Io;
+with Ada.Calendar; use Ada.Calendar;
+with Ada.Numerics.Discrete_Random;
 
+procedure Intbuffer is
+   
+   type Buffer_Array is array (0 .. 19) of Integer; --Buffer array with length of 20
+   
+   subtype Random_Number is Integer range 0 .. 400; --Random number between 0 and 400
+   
+   package Random_Number_Generator is new Ada.Numerics.Discrete_Random (Random_Number);
+   use Random_Number_Generator;
+   
+   -- Buffer task
+   task Buffer is
+      entry Write(I : Integer); --Write input I to buffer
+      entry Read(I : out Integer); --Read from buffer and output to I
+      entry Quit; --Stop buffer task
+   end Buffer;
+   
+   -- Producer task, inputs random numbers between 0 and 25 to buffer
+   task Producer is 
+      entry Quit; --Stop producer task
+   end Producer;   
+   
+   -- Consumer task, reads from buffer
+   task Consumer;
+   
+   task body Buffer is
+      B : Buffer_Array; -- The array used for the cyclic buffer
+      PR, PW : Integer := 0; -- Read and Write pointers
+      D : Integer := 0; -- Number of readable elements in cyclic buffer
+      L : constant Integer := 20; -- Length of cyclic buffer
+      Q : Boolean := False; -- Exit the task when Q = true
+   begin
+      while (not Q) loop --Loop as long as we dont get a quit
+	 
+	 select 
+	    when (D < L) => --If still free spots in buffer
+	       accept Write(I : Integer) do --accept input I to write to buffer
+		  B(PW) := I; --Write I to buffer
+		  PW := (PW + 1) mod L; --Move Write pointer to next slot
+		  D := D + 1; --A new spot has been filled, increase number of busy slots
+	       end Write;
+	 or
+	    when (D /= 0) => --If there are any readable elements in the buffer
+	       accept Read(I : out Integer) do	--accept the read command	  
+		  I := B(PR); --output the first readable element in the buffer	  
+	       end Read;
+	       PR := (PR + 1) mod L; --move the read pointer to next readable element in buffer      
+	       D := D - 1; --decrease number of busy slots
+	 or 
+	    accept Quit do
+	       Q := True; --Quit the buffer
+	    end Quit;
+	 end select;
+	 
+      end loop;
+      
+      Put_Line("Buffer ended.");
+      
+   end Buffer;
+   
+   -- Producer task
+   task body Producer is 
+      G : Generator; --Generator for creating random number
+      Q : Boolean := False; --Quit flag
+      I : Integer; --Number to write to buffer
+   begin 
+      Reset(G); --Create new random number
+      
+      while (not Q) loop --As long as we shouldn't quit
+	 
+	 
+	 select
+	    delay Duration(Float(Random(G)) / 1000.0); --Randomize execution time
+	    I := Random(G) mod 26; --Create random number between 0 and 25 to put to buffer
+	    Put_Line("Producer writes" & Integer'Image(I));
+	    Buffer.Write(I); --Write to buffer
+	 or
+	    accept Quit do --If quit command is run
+	       Q := True; --set quit flag
+	    end Quit;
+	 end select;
+      end loop;
+      
+      Put_Line("Producer ended.");
+      
+   end Producer;
+   
+   -- Consumer task
+   -- Reads from buffer until numbers read add up at least 100
+   task body Consumer is 
+      G : Generator; --Generator for creating random number
+      C : Integer := 0; --Counter summing up read values
+      I : Integer := 0; --Value read from buffer
+   begin
+      
+      Reset(G); --Create new random number
+      
+      while (C < 100) loop --if the sum is less than 100
+      	 delay Duration(Float(Random(G)) / 1000.0); --Randomize execution time
+	 Buffer.Read(I); --Read from buffer
+	 C := C + I; --Add read value to the sum counter
+	 Put_Line("Consumer read" & Integer'Image(I) & ".");
+	 
+      end loop;
+      Producer.Quit; --quit the producer
+      Buffer.Quit; --quit the buffer
+      Put_Line("Consumer ended.");      
+   end Consumer;
+   
+begin
+   null;
+end Intbuffer;
 \end{lstlisting}
 
 \subsection{Printouts}
 
 \begin{lstlisting}[language=Bash]
-
+  beurling> intbuffer
+  Producer writes 1
+  Consumer read 1.
+  Producer writes 0
+  Consumer read 0.
+  Producer writes 11
+  Consumer read 11.
+  Producer writes 12
+  Consumer read 12.
+  Producer writes 15
+  Producer writes 23
+  Consumer read 15.
+  Consumer read 23.
+  Producer writes 0
+  Producer writes 5
+  Producer writes 6
+  Producer writes 5
+  Producer writes 23
+  Consumer read 0.
+  Producer writes 19
+  Producer writes 4
+  Consumer read 5.
+  Consumer read 6.
+  Consumer read 5.
+  Producer writes 8
+  Producer writes 23
+  Producer writes 24
+  Consumer read 23.
+  Producer ended.
+  Consumer ended.
+  Buffer ended.
 \end{lstlisting}
 
 \section{Part 4: Data Driven Synchronization}
@@ -194,13 +523,136 @@ In the fourth part of the lab the code in Part 3 should be re-implemented using 
 \subsection{Code}
 
 \begin{lstlisting}
+with Ada.Text_Io; use Ada.Text_Io;
+with Ada.Calendar; use Ada.Calendar;
+with Ada.Numerics.Discrete_Random;
 
+procedure Intbuffertwo is
+   
+   type Buffer_Array is array (0 .. 19) of Integer; --Buffer array with length of 20
+   subtype Random_Number is Integer range 0 .. 400; --Random number between 0 and 400
+   package Random_Number_Generator is new Ada.Numerics.Discrete_Random (Random_Number);
+   use Random_Number_Generator;
+   
+   -- Consumer task, reads from buffer
+   task Consumer;
+   
+   -- Producer task, inputs random numbers between 0 and 25 to buffer
+   task Producer is 
+      entry Quit;
+   end Producer;   
+   
+   -- Protected shared buffer type that contains a circular buffer and entry points to interact with it   
+   protected type Buffer is
+      entry Read(I : out Integer);
+      entry Write(I : Integer);
+   private
+      B : Buffer_Array; -- Array to represent cyclic buffer
+      PW : Integer := 0; -- Write pointer
+      PR : Integer := 0; -- Read pointer
+      D : Integer := 0; -- Number of readable elements in buffer
+      L : Integer := 20; -- The length of the cyclic buffer
+   end Buffer;
+   
+   protected body Buffer is
+      --Write to buffer
+      entry Write(I : Integer) 
+      when D < L is --if free slots left in buffer
+      begin
+	 B(PW) := I; --add input to buffer
+	 PW := (PW + 1) mod L; --move write pointer to next free slot
+	 D := D + 1; --increase number of used slots
+      end Write;
+      
+      --Read from buffer
+      entry Read(I : out Integer) --return Integer
+      when D /= 0 is --if readable elements in buffer
+      begin
+	 I:= B(PR); --output element from buffer
+	 PR := (PR + 1) mod L; --move read pointer to next readble element
+	 D := D - 1; --decrease number of used slots
+      end Read;	 
+   end Buffer;
+   
+   B : Buffer;
+   
+   -- Producer task
+   task body Producer is 
+      G : Generator; --Generator for creating random numbers
+      Q : Boolean := False; --Quit flag
+      I : Integer; --Number to put on buffer
+   begin
+      
+      Reset(G); --create new random number
+      
+      while (not Q) loop --As long as we shouldn't quit 
+	 
+	 select
+	    delay Duration(Float(Random(G)) / 1000.0); --randomize execution time
+	    I := Random(G) mod 26; --create random number between 0 and 25 to put to buffer
+	    Put_Line("Producer writes" & Integer'Image(I));
+	    B.Write(I); --put number to buffer
+	 or
+	    accept Quit do --If quit command
+	       Q := True; --toggle quit flag
+	    end Quit;
+	 end select;
+      end loop;
+      
+      Put_Line("Producer ended.");
+      
+   end Producer;
+   
+   -- Consumer task
+   task body Consumer is 
+      G : Generator; --Generator for creating random numbers
+      C : Integer := 0; --Counter summing up read values
+      I : Integer := 0; --Value read from buffer
+   begin
+      
+      Reset(G); --create new random number
+      
+      while (C < 100) loop --if the sum is less than 100
+	 delay Duration(Float(Random(G)) / 1000.0); --Randomize execution time
+	 B.Read(I); --Read from buffer
+	 C := C + I; --Add read value to the sum counter
+	 Put_Line("Consumer read" & Integer'Image(I) & ".");
+      end loop;
+      Producer.Quit; --quit the producer
+      Put_Line("Consumer ended.");
+      
+   end Consumer;
+   
+begin
+   null;
+end Intbuffertwo;
 \end{lstlisting}
 
 \subsection{Printouts}
 
 \begin{lstlisting}[language=Bash]
-
+  beurling> intbuffertwo 
+  Producer writes 0
+  Consumer read 0.
+  Producer writes 8
+  Consumer read 8.
+  Producer writes 25
+  Consumer read 25.
+  Producer writes 6
+  Consumer read 6.
+  Producer writes 13
+  Producer writes 14
+  Producer writes 16
+  Consumer read 13.
+  Consumer read 14.
+  Producer writes 13
+  Consumer read 16.
+  Producer writes 8
+  Consumer read 13.
+  Producer writes 10
+  Consumer read 8.
+  Producer ended.
+  Consumer ended.
 \end{lstlisting}
 
 \end{document}

@@ -81,6 +81,7 @@ begin
 	 F3Watchdog.F3End(B); --End watchdog
 	 if B then --If missed deadline
 	    T := T + 1.0; --Set next execution time for F1 to the next second instead
+	    F3Flip := not F3Flip; -- Run F3 next round as well, since we skip one second.
 	 end if;
       end if;
       F3Flip := not F3Flip; --Toggle F3 run-second
