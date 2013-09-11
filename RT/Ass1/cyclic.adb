@@ -22,10 +22,10 @@ procedure Cyclic is
    end F3;
 begin
    loop 
+	T := T + 1.0;	
       F1;
-      F2;
-      T := T + 1.0;
-      if Flip = True then
+      F2;  
+      if Flip then
 	 delay until (T-0.5);
 	 F3;
       end if;

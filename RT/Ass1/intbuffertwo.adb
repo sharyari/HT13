@@ -5,11 +5,8 @@ with Ada.Numerics.Discrete_Random;
 procedure Intbuffertwo is
    
    type Buffer_Array is array (0 .. 19) of Integer;
-   
    subtype Random_Number is Integer range 0 .. 400;
-   
    package Random_Number_Generator is new Ada.Numerics.Discrete_Random (Random_Number);
-   
    use Random_Number_Generator;
    
    task Consumer;
@@ -27,7 +24,6 @@ procedure Intbuffertwo is
       PR : Integer := 0; -- Read pointer
       D : Integer := 0; -- Number of readable elements in buffer
       L : Integer := 20; -- The length of the cyclic buffer
-      Q : Boolean := False; -- End task when Q = true
    end Buffer;
    
    protected body Buffer is
@@ -63,12 +59,12 @@ procedure Intbuffertwo is
       Reset(G);
       
       while (not Q) loop
+ 
+	 select
+	    delay Duration(Float(Random(G)) / 1000.0);
 	 I := Random(G) mod 26;
 	 Put_Line("Producer writes" & Integer'Image(I));
 	 B.Write(I);
-	 
-	 select
-	    delay Duration(Float(Random(G)) / 1000.0);
 	 or
 	    accept Quit do
 	       Q := True;
