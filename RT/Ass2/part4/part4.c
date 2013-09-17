@@ -26,7 +26,9 @@ DeclareCounter(SysTimerCnt);
 #define BPTP 10
 #define DTP 100
 #define USTP 100
+#define PREFERREDSPEED 100
 #define TURNSPEED 80
+#define COLOR_THRESHOLD 50
 
 #define DEBUG_MODE 0
 
@@ -91,24 +93,26 @@ void calibrate() {
 			systick_wait_ms(10);
 	}
 	color[firstrun] = (a[0]+a[1]+a[2])/3; 
-	change_driving_command(PRIO_BUTTON, 100, 400, FORW);
-	systick_wait_ms(1000); // Should (?) be moved back to calibrate()
+	change_driving_command(PRIO_BUTTON, PREFERREDSPEED, 400, FORW);
+	systick_wait_ms(1000);
 }
 
 
 TASK(ButtonpressTask){
 	if (TOUCHVAL)
-		change_driving_command(PRIO_BUTTON, -100, 1000, FORW); 		
+		change_driving_command(PRIO_BUTTON, -PREFERREDSPEED, 1000, FORW);
 	TerminateTask();
 }
 
-TASK(DisplayTask){
+TASK(DisplayTask) {
+
+	// Only allow one instance of DisplayTask to run at a time.
 	GetResource(DisplayTaskLock);
 	
 	if (firstrun){
 		firstrun--;
 		calibrate();
-	} else {
+	} else if(DEBUG_MODE) {
 		display_string("[");
 		display_int(color[0],3);
 		display_string(",");
@@ -123,8 +127,10 @@ TASK(DisplayTask){
 		display_int(firstrun,1);
 		display_update();
 	}
-
+	
+	// Allow the next DisplayTask to start.
 	ReleaseResource(DisplayTaskLock);
+
 	TerminateTask();
 }
 
@@ -137,13 +143,19 @@ TASK(CompetitionTask) {
 	else
 		counter = (counter+1%100);
 	if (distance > 20 && distance < 100) {
-		if (l > 500)
-			change_driving_command(PRIO_BUTTON, 100, USTP, FORW);
-		else if (l < 400)
-			change_driving_command(PRIO_BUTTON, 100, USTP, FORW);
-		else
-			change_driving_command(PRIO_BUTTON, 100, USTP, FORW);
+		// PRE: We are tracking the inner circuit, clockwise.
+		if(l < color[1] - COLOR_THRESHOLD) {
+			// Read black, the track is turning right.
+			change_driving_command(PRIO_BUTTON, PREFERREDSPEED, USTP, RIGHT);		
+		} else if(l > color[1] + COLOR_THRESHOLD) {
+			// Read white, the track is turning left.
+			change_driving_command(PRIO_BUTTON, PREFERREDSPEED, USTP, LEFT);
+		} else {
+			// Read brown, the track is straight.
+			change_driving_command(PRIO_BUTTON, PREFERREDSPEED, USTP, FORW);
+		}
 	}
+
 	TerminateTask();
 }
 
