@@ -26,39 +26,44 @@ DeclareCounter(SysTimerCnt);
 #define USTP 100
 
 struct dc_t {
-    U32 duration;
-    S32 speed;
-    int priority;
+  U32 duration;
+  S32 speed;
+  int priority;
 } dc = {0, 0, PRIO_IDLE};
 
 
-void change_driving_command(int priority, int speed, int duration) {
-	if (priority >= dc.priority) {
-		dc.priority = priority;
-		dc.speed = speed;
-		dc.duration = duration;
-	}
-}
-
-
 void ecrobot_device_initialize() {
-ecrobot_init_sonar_sensor(ULTRASONICSENSOR) ;
+  ecrobot_init_sonar_sensor(ULTRASONICSENSOR) ; // initiate sensors
   ecrobot_set_light_sensor_active(LIGHTSENSOR);
 }
 void ecrobot_device_terminate() {
-ecrobot_term_sonar_sensor(ULTRASONICSENSOR) ;
+  ecrobot_term_sonar_sensor(ULTRASONICSENSOR) ; // turn sensors off
   ecrobot_set_light_sensor_inactive(LIGHTSENSOR);
-}
-
-void display_light_intensity() {
-      display_clear(1);
-      display_goto_xy(0,0);
-      display_unsigned(LIGHTVAL, 3);
-      display_update();
 }
 
 void user_1ms_isr_type2(void){ (void)SignalCounter(SysTimerCnt); } 
 
+void change_driving_command(int priority, int speed, int duration) {
+  /* If a new driving command is sent, overwrite the previous if the new
+     command has higher priority than the current. */
+  if (priority >= dc.priority) {
+    dc.priority = priority;
+    dc.speed = speed;
+    dc.duration = duration;
+  }
+}
+
+/* This function will print the light intensity on the LCD */
+void display_light_intensity() {
+  display_clear(1);
+  display_goto_xy(0,0);
+  display_string("Light:  ");
+  display_unsigned(LIGHTVAL, 3);
+  display_update();
+}
+
+/*  This function will take 10 light intensity values, waiting 100ms between each measurement
+    and return the mean measurement value. This is used for initial calibration */
 int light_calibration_proc() {
   int threshold = 0;
   for (int i=0;i<10;i++){
@@ -68,36 +73,40 @@ int light_calibration_proc() {
   return threshold /= 10;
 }
 
+/* If the button is pressed, reverse for 1 second
+   (actually, from pressed and for approximately one second after release time) */
 TASK(ButtonpressTask){
-	if (TOUCHVAL)
-		change_driving_command(PRIO_BUTTON, -100, 1000); 		
-	TerminateTask();
+  if (TOUCHVAL)
+    change_driving_command(PRIO_BUTTON, -100, 1000); 		
+  TerminateTask();
 }
 
 TASK(DisplayTask){
-
-TerminateTask();
+  display_light_intensity();
+  TerminateTask();
 }
 
+/* If an obstacle is closer than 100cm away, but further than 20cm
+   move forward. (100cm because the accuracy above 100ms is low, and we
+   also want the robot to stop, so we don't have to chase it around) */
 TASK(UltrasonicTask) {
-	int d = ULTRAVAL;
-	if (d > 20 && d < 100)
-		change_driving_command(PRIO_BUTTON, 100, USTP);
-	TerminateTask();
+  int d = ULTRAVAL; /* read the ultrasonic value, see #define */
+  if (d > 20 && d < 100)
+    /* drive forward until the next time this task is released */
+    change_driving_command(PRIO_BUTTON, 100, USTP);
+  TerminateTask();
 }
 
 TASK(MotorcontrolTask) {
-	if (dc.duration > 0){
-    	nxt_motor_set_speed(NXT_PORT_A, dc.speed, 0);
-   		nxt_motor_set_speed(NXT_PORT_B, dc.speed, 0);
-		dc.duration-=MCTP;
-	} else if (dc.priority == PRIO_IDLE)
-		;
-	else {
-	    nxt_motor_set_speed(NXT_PORT_A, 0, 1);
-	    nxt_motor_set_speed(NXT_PORT_B, 0, 1);
-		dc.priority = PRIO_IDLE;
-	}
-	TerminateTask();
+  if (dc.duration > 0){ /* if we should drive... */
+    nxt_motor_set_speed(NXT_PORT_A, dc.speed, 0); /* ... drive */
+    nxt_motor_set_speed(NXT_PORT_B, dc.speed, 0);
+    dc.duration-=MCTP; /* decrease drive time with the period of this task */
+  } else if (dc.priority != PRIO_IDLE) { 
+    /* if duration is negative or zero, stop */
+    nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+    nxt_motor_set_speed(NXT_PORT_B, 0, 1);
+    dc.priority = PRIO_IDLE;
+  }
+  TerminateTask();
 }
-
