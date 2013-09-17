@@ -80,13 +80,9 @@ TerminateTask();
 }
 
 TASK(UltrasonicTask) {
-	int d2 = ULTRAVAL;
-	if (d2 <= 100) {
-		if (d2 > 20)
-			change_driving_command(PRIO_BUTTON, 50+(d2/2), USTP);
-		if (d2 <= 20)
-			change_driving_command(PRIO_BUTTON, -50+2.5*(d2-20), USTP);			
-	}
+	int d = ULTRAVAL;
+	if (d > 20 && d < 100)
+		change_driving_command(PRIO_BUTTON, 100, USTP);
 	TerminateTask();
 }
 

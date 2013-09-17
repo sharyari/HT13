@@ -1,0 +1,3 @@
+#!/bin/bash
+cp part4.rxe "$1".rxe
+/it/kurs/realtid/bin/nxjupload -r "$1".rxe
