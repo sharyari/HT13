@@ -26,9 +26,10 @@ DeclareCounter(SysTimerCnt);
 #define BPTP 10
 #define DTP 100
 #define USTP 100
-#define PREFERREDSPEED 100
-#define TURNSPEED 80
-#define COLOR_THRESHOLD 50
+#define CALIBRATESPEED 100
+#define PREFERREDSPEED 70
+#define TURNSPEED 0
+#define COLOR_THRESHOLD 20
 
 #define DEBUG_MODE 0
 
@@ -93,7 +94,7 @@ void calibrate() {
 			systick_wait_ms(10);
 	}
 	color[firstrun] = (a[0]+a[1]+a[2])/3; 
-	change_driving_command(PRIO_BUTTON, PREFERREDSPEED, 400, FORW);
+	change_driving_command(PRIO_BUTTON, CALIBRATESPEED, 400, FORW);
 	systick_wait_ms(1000);
 }
 
@@ -142,7 +143,7 @@ TASK(CompetitionTask) {
 		distance = ULTRAVAL;
 	else
 		counter = (counter+1%100);
-	if (distance > 20 && distance < 100) {
+	if (distance > 20 /*&& distance < 100*/) {
 		// PRE: We are tracking the inner circuit, clockwise.
 		if(l < color[1] - COLOR_THRESHOLD) {
 			// Read black, the track is turning right.
