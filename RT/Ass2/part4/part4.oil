@@ -78,7 +78,7 @@ CPU ATMEL_AT91SAM7S256
     AUTOSTART = TRUE
     {
         ALARMTIME = 1;
-        CYCLETIME = 50;
+        CYCLETIME = 10;
         APPMODE = appmode1;
     };
   };
@@ -93,7 +93,7 @@ CPU ATMEL_AT91SAM7S256
     AUTOSTART = TRUE
     {
         ALARMTIME = 1;
-        CYCLETIME = 10;
+        CYCLETIME = 100;
         APPMODE = appmode1;
     };
   };
@@ -122,7 +122,7 @@ ALARM cyclic_alarm4
     AUTOSTART = TRUE
     {
         ALARMTIME = 1;
-        CYCLETIME = 100;
+        CYCLETIME = 10;
         APPMODE = appmode1;
     };
   };

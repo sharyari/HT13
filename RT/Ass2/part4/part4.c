@@ -21,18 +21,19 @@ DeclareCounter(SysTimerCnt);
 #define TOUCHVAL ecrobot_get_touch_sensor(TOUCHSENSOR)
 #define PRIO_IDLE 10
 #define PRIO_BUTTON 20
-#define SPEED 70
-#define MCTP 50
-#define BPTP 10
+#define MCTP 10
+#define BPTP 100
 #define DTP 100
-#define USTP 100
+#define USTP 10
 #define CALIBRATESPEED 100
-#define PREFERREDSPEED 70
-#define TURNSPEED 0
+#define PREFERREDSPEED 100
+int TURNSPEED = 75;
 #define COLOR_THRESHOLD 20
 
 #define DEBUG_MODE 0
 
+
+int drifttime = 0;
 int counter;
 int distance;
 int firstrun = 3;
@@ -95,7 +96,7 @@ void calibrate() {
 	}
 	color[firstrun] = (a[0]+a[1]+a[2])/3; 
 	change_driving_command(PRIO_BUTTON, CALIBRATESPEED, 400, FORW);
-	systick_wait_ms(1000);
+	systick_wait_ms(500);
 }
 
 
@@ -136,37 +137,40 @@ TASK(DisplayTask) {
 }
 
 TASK(CompetitionTask) {
-	if (firstrun)
-		TerminateTask();
-	int l = LIGHTVAL;
-	if (counter == 0)
-		distance = ULTRAVAL;
-	else
-		counter = (counter+1%100);
-	if (distance > 20 /*&& distance < 100*/) {
-		// PRE: We are tracking the inner circuit, clockwise.
-		if(l < color[1] - COLOR_THRESHOLD) {
-			// Read black, the track is turning right.
-			change_driving_command(PRIO_BUTTON, PREFERREDSPEED, USTP, RIGHT);		
-		} else if(l > color[1] + COLOR_THRESHOLD) {
-			// Read white, the track is turning left.
-			change_driving_command(PRIO_BUTTON, PREFERREDSPEED, USTP, LEFT);
-		} else {
-			// Read brown, the track is straight.
-			change_driving_command(PRIO_BUTTON, PREFERREDSPEED, USTP, FORW);
-		}
-	}
-
-	TerminateTask();
+  if (firstrun)
+    TerminateTask();
+  int l = LIGHTVAL;
+  if (counter < USTP)
+    distance = ULTRAVAL;
+  else
+    counter = (counter+USTP%100);
+  if (distance > 20 /*&& distance < 100*/) {
+    // PRE: We are tracking the inner circuit, clockwise.
+    if(l > color[0] - COLOR_THRESHOLD) {
+      // Read black, the track is turning right.
+      drifttime=(drifttime+1)%100;
+      change_driving_command(PRIO_BUTTON, PREFERREDSPEED, MCTP, RIGHT);		
+    } else if(l < color[2] + COLOR_THRESHOLD) {
+      drifttime=(drifttime+1)%100;
+      // Read white, the track is turning left.
+      change_driving_command(PRIO_BUTTON, PREFERREDSPEED, MCTP, LEFT);
+    } else {
+      // Read brown, the track is straight.
+      drifttime=0;
+      change_driving_command(PRIO_BUTTON, PREFERREDSPEED, MCTP, FORW);
+    }
+  }
+  
+  TerminateTask();
 }
 
 TASK(MotorcontrolTask) {
 	int leftw = dc.speed; int rightw = dc.speed;
 	if (dc.duration > 0){
 		if (dc.t == LEFT){
-			rightw = TURNSPEED;
+		  rightw = TURNSPEED-drifttime;
 		} else if (dc.t == RIGHT){
-			leftw = TURNSPEED;
+		  leftw = TURNSPEED-drifttime;
 		} 
 		nxt_motor_set_speed(NXT_PORT_A, leftw, 0);
    		nxt_motor_set_speed(NXT_PORT_B, rightw, 0);
