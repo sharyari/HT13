@@ -1,0 +1,544 @@
+\documentclass[a4paper,10pt]{report}
+\usepackage{fullpage}
+\usepackage[british]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc} 
+%\usepackage{amsthm} \newtheorem{theorem}{Theorem}
+\usepackage{color}
+\usepackage{float}
+
+
+
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+
+
+\usepackage{alltt}
+\usepackage{listings}
+ \usepackage{aeguill} 
+\usepackage{dsfont}
+%\usepackage{algorithm}
+%\usepackage{algorithmicx}
+\usepackage{subfig}
+\lstset{% parameters for all code listings
+	language=Python,
+	frame=single,
+	basicstyle=\small,  % nothing smaller than \footnotesize, please
+	tabsize=2,
+	numbers=left,
+%	framexleftmargin=2em,  % extend frame to include line numbers
+	%xrightmargin=2em,  % extra space to fit 79 characters
+	breaklines=true,
+	breakatwhitespace=true,
+	prebreak={/},
+	captionpos=b,
+	columns=fullflexible,
+	escapeinside={\#*}{\^^M}
+}
+
+
+% Alter some LaTeX defaults for better treatment of figures:
+    % See p.105 of "TeX Unbound" for suggested values.
+    % See pp. 199-200 of Lamport's "LaTeX" book for details.
+    %   General parameters, for ALL pages:
+    \renewcommand{\topfraction}{0.9}	% max fraction of floats at top
+    \renewcommand{\bottomfraction}{0.8}	% max fraction of floats at bottom
+    %   Parameters for TEXT pages (not float pages):
+    \setcounter{topnumber}{2}
+    \setcounter{bottomnumber}{2}
+    \setcounter{totalnumber}{4}     % 2 may work better
+    \setcounter{dbltopnumber}{2}    % for 2-column pages
+    \renewcommand{\dbltopfraction}{0.9}	% fit big float above 2-col. text
+    \renewcommand{\textfraction}{0.07}	% allow minimal text w. figs
+    %   Parameters for FLOAT pages (not text pages):
+    \renewcommand{\floatpagefraction}{0.7}	% require fuller float pages
+	% N.B.: floatpagefraction MUST be less than topfraction !!
+    \renewcommand{\dblfloatpagefraction}{0.7}	% require fuller float pages
+
+	% remember to use [htp] or [htpb] for placement
+
+
+\usepackage{fancyvrb}
+%\DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\small}
+%\DefineVerbatimEnvironment{example}{Verbatim}{fontsize=\small}
+
+\usepackage{url}
+\urldef{\mailsa}\path|sharyari@gmail.com |    
+\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+\noindent\keywordname\enspace\ignorespaces#1}
+
+
+\usepackage{tikz} \usetikzlibrary{trees}
+\usepackage{hyperref}  % should always be the last package
+
+% useful colours (use sparingly!):
+\newcommand{\blue}[1]{{\color{blue}#1}}
+\newcommand{\green}[1]{{\color{green}#1}}
+\newcommand{\red}[1]{{\color{red}#1}}
+
+% useful wrappers for algorithmic/Python notation:
+\newcommand{\length}[1]{\text{len}(#1)}
+\newcommand{\twodots}{\mathinner{\ldotp\ldotp}}  % taken from clrscode3e.sty
+\newcommand{\Oh}[1]{\mathcal{O}\left(#1\right)}
+
+% useful (wrappers for) math symbols:
+\newcommand{\Cardinality}[1]{\left\lvert#1\right\rvert}
+%\newcommand{\Cardinality}[1]{\##1}
+\newcommand{\Ceiling}[1]{\left\lceil#1\right\rceil}
+\newcommand{\Floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand{\Iff}{\Leftrightarrow}
+\newcommand{\Implies}{\Rightarrow}
+\newcommand{\Intersect}{\cap}
+\newcommand{\Sequence}[1]{\left[#1\right]}
+\newcommand{\Set}[1]{\left\{#1\right\}}
+\newcommand{\SetComp}[2]{\Set{#1\SuchThat#2}}
+\newcommand{\SuchThat}{\mid}
+\newcommand{\Tuple}[1]{\langle#1\rangle}
+\newcommand{\Union}{\cup}
+\usetikzlibrary{positioning,shapes,shadows,arrows}
+
+\pagestyle{empty}
+
+\title{\textbf{Programming in RTOS using OSEK\\ and Lego Mindstorms NXT}}
+
+\author{Jonathan Sharyari \and Daniel Tibbing \and Bj{\"o}rn Forsberg}
+
+\begin{document}
+\maketitle
+
+\section*{Part 2: Event Driven Scheduling}
+
+This part of the lab consists of writing an event driven scheduler that used a light sensor to stay on top of a table. To achieve this goal the robot initially  calibrates the light sensor against the color of the table. Note that this requires that the robot is on the table at system startup. 
+
+The robot then polls the light value at regular intervals (every 100ms) and also displays this value on the LCD screen. If a light value differs from the calibrated value with more than 5 percent, the robot will stop regardless if the button is pressed or not. It will start again first when it is back on the table, and the button is released and pressed again.
+
+The calibration is done by reading ten light values with 100ms intervals, and using the mean value as the calibrated value.
+
+The software consists of two tasks, \texttt{EventdispatcherTask} and \texttt{MotorcontrolTask}. The \texttt{EventdispatcherTask} regularly updates the display with light values. Further, it polls the button to see if it is pressed or not. When the button is pressed, a \texttt{TouchOnEvent} is sent, and when the button is released a \texttt{TouchOffEvent}. Also, if the light value differs as explained above, a \texttt{LightChangeEvent} is released.
+
+The \texttt{MotorcontrolTask} waits for the three events. Initially, the motors are off and the task waits for a \texttt{TouchOnEvent}. When such an event is received, the motors are turned on and it instead awaits either a \texttt{LightChangeEvent} or a \texttt{TouchOffEvent}, treating these equally (this means that the \texttt{LightChangeEvent} and \texttt{TouchOffEvent} could both be merged to a single \texttt{StopEvent}).
+
+
+\appendix
+\subsection*{Part 2: C-code}
+
+\begin{lstlisting}[label=some-code,caption=part2.c,mathescape]
+#include <stdlib.h>
+#include <stdio.h>
+#include "kernel.h"
+#include "kernel_id.h"
+#include "ecrobot_interface.h"
+
+DeclareTask(MotorcontrolTask);
+DeclareTask(EventdispatcherTask);
+DeclareEvent(TouchOnEvent);
+DeclareEvent(TouchOffEvent);
+DeclareEvent(LightChangeEvent);
+
+#define LIGHTSENSOR NXT_PORT_S1
+#define TOUCHSENSOR NXT_PORT_S2
+#define LIGHTVAL ecrobot_get_light_sensor(LIGHTSENSOR)
+#define TOUCHVAL ecrobot_get_touch_sensor(TOUCHSENSOR)
+
+void user_1ms_isr_type2(void) {}
+
+void ecrobot_device_initialize() {
+  ecrobot_set_light_sensor_active(LIGHTSENSOR);
+}
+void ecrobot_device_terminate() {
+  ecrobot_set_light_sensor_inactive(LIGHTSENSOR);
+}
+
+/* This function will print the light intensity on the LCD */
+void display_light_intensity() {
+  display_clear(1);
+  display_goto_xy(0,0);
+  display_string("Light: ");
+  display_unsigned(LIGHTVAL, 3);
+  display_update();
+}
+
+/*  This function will take 10 light intensity values, waiting 100ms between each measurement
+    and return the mean measurement value. This is used for initial calibration */
+int light_calibration_proc() {
+  int threshold = 0;
+  for (int i = 0; i < 10; i++){
+    threshold += LIGHTVAL;
+    systick_wait_ms(100);
+  }
+  return threshold /= 10;
+}
+
+TASK(EventdispatcherTask){
+  /* state is TRUE when the button is pressed, else FALSE */ 
+  int state = FALSE;
+  /* Threshold holds the initial light settings. The robot must be on the working surface when initialized */	
+  int threshold = light_calibration_proc();
+  
+  while (TRUE) { /* Forever! */
+    if (state != TOUCHVAL) { /* If state has changed */
+      state = !state; /* State changed, so we update the variable */
+      if (state) /* If button pressed */
+	SetEvent(MotorcontrolTask, TouchOnEvent); /* Signal motors to run */
+      else
+	SetEvent(MotorcontrolTask, TouchOffEvent); /* Signal motors to stop */
+    }
+    
+    if (state && LIGHTVAL >= threshold*1.05){ /* If we're running, and the table can't be detected */
+      SetEvent(MotorcontrolTask, LightChangeEvent); /* Stop the motors */
+      state = !state;
+    }
+    display_light_intensity(); /* Update the light values on the display*/
+    systick_wait_ms(100); /* Do we need this? */
+  }
+}
+
+TASK(MotorcontrolTask) {
+  while(true) {
+    WaitEvent(TouchOnEvent); /* Wait until told to drive */
+    ClearEvent(TouchOnEvent);
+    nxt_motor_set_speed(NXT_PORT_A, 100, 0);
+    nxt_motor_set_speed(NXT_PORT_B, 100, 0);
+    
+    /* Wait for a break command, either from a button release or because the table went undetected */
+    WaitEvent(TouchOffEvent | LightChangeEvent); 
+    ClearEvent(TouchOffEvent);   
+    ClearEvent(LightChangeEvent);
+    nxt_motor_set_speed(NXT_PORT_A, 0, 1); /* Break */
+    nxt_motor_set_speed(NXT_PORT_B, 0, 1);
+  }
+}
+
+
+\end{lstlisting}
+\newpage
+\subsection*{Part 2: Oil-file}
+
+\begin{lstlisting}[label=some-code,caption=part2.oil,mathescape]
+#include "implementation.oil"
+
+CPU ATMEL_AT91SAM7S256
+{
+  OS LEJOS_OSEK
+  {
+    STATUS = EXTENDED;
+    STARTUPHOOK = FALSE;
+    ERRORHOOK = FALSE;
+    SHUTDOWNHOOK = FALSE;
+    PRETASKHOOK = FALSE;
+    POSTTASKHOOK = FALSE;
+    USEGETSERVICEID = FALSE;
+    USEPARAMETERACCESS = FALSE;
+    USERESSCHEDULER = FALSE;
+  };
+
+  /* Definition of application mode */
+  APPMODE appmode1{};
+
+  EVENT TouchOnEvent { MASK = AUTO; };
+  EVENT TouchOffEvent { MASK = AUTO; };
+  EVENT LightChangeEvent { MASK = AUTO; };	
+
+  TASK MotorcontrolTask
+  {
+    AUTOSTART = TRUE
+    {
+      APPMODE = appmode1;
+    };
+    PRIORITY = 2; /* Smaller value means lower priority */
+    ACTIVATION = 1;
+    SCHEDULE = FULL;
+    STACKSIZE = 512; /* Stack size */
+    EVENT = TouchOnEvent;
+    EVENT = TouchOffEvent;
+    EVENT = LightChangeEvent;
+  };
+
+
+  TASK EventdispatcherTask 
+  {
+    AUTOSTART = TRUE
+    {
+      APPMODE = appmode1;
+    };
+    PRIORITY = 1; /* Smaller value means lower priority */
+    ACTIVATION = 1;
+    SCHEDULE = FULL;
+    STACKSIZE = 512; /* Stack size */
+  };
+
+
+};
+
+\end{lstlisting}
+\newpage
+
+\section*{Part 3: Periodic Scheduling}
+
+The third part of the lab consists of adding an ultra sonic sensor, which is used to measure distance, to the robot. The robot software is updated to use the sensor to keep a distance of 20 cm to the object in front of it.
+
+The updated robot software still includes the \texttt{MotorcontrolTask} from the previous part, but not the \texttt{EventdispatcherTask}, since we are now driving the robot with scheduled tasks instead of events. This also introduces changes to the \texttt{MotorcontrolTask}, which is no longer waiting for events. Three new tasks are introduced, the \texttt{ButtonpressTask}, \texttt{DisplayTask} and \texttt{UltrasonicTask}, handling the pressing of the button, displaying the light intensity and measuring the distance to the object in front of the robot, respectively.
+
+The different tasks are run in parallell at different intervals, and they continously update the overall state of the robot to accound for the measured changes in the environment. 
+
+The \texttt{UltrasonicTask} causes the robot to move forward if the distance to the object in front of the robot is between 20 and 100 cm. The execution interval of the UltrasonicTask is 100 ms, which means that the robot will move forward for 100 ms, after which the distance is recalculated.
+
+The \texttt{ButtonpressTask} is run at run every 10 ms and polls the button attached to the robot. If the button is pressed, it overrides any previous move commands and moves the robot backwards.
+
+The \texttt{DisplayTask} polls the light sensor at 100 ms intervals and prints the value to the LCD display.
+
+\subsection*{Part 3: C-code}
+\begin{lstlisting}[label=some-code,caption=part3.c,mathescape]
+#include <stdlib.h>
+#include <stdio.h>
+#include "kernel.h"
+#include "kernel_id.h"
+#include "ecrobot_interface.h"
+
+DeclareTask(DisplayTask);
+DeclareTask(MotorcontrolTask);
+DeclareTask(ButtonpressTask);
+DeclareTask(UltrasonicTask);
+
+DeclareCounter(SysTimerCnt);
+
+#define LIGHTSENSOR NXT_PORT_S1
+#define TOUCHSENSOR NXT_PORT_S2
+#define ULTRASONICSENSOR NXT_PORT_S3
+#define LIGHTVAL ecrobot_get_light_sensor(LIGHTSENSOR)
+#define ULTRAVAL ecrobot_get_sonar_sensor(ULTRASONICSENSOR)
+#define TOUCHVAL ecrobot_get_touch_sensor(TOUCHSENSOR)
+#define PRIO_IDLE 10
+#define PRIO_BUTTON 20
+#define SPEED 70
+#define MCTP 50
+#define BPTP 10
+#define DTP 100
+#define USTP 100
+
+struct dc_t {
+  U32 duration;
+  S32 speed;
+  int priority;
+} dc = {0, 0, PRIO_IDLE};
+
+
+void ecrobot_device_initialize() {
+  ecrobot_init_sonar_sensor(ULTRASONICSENSOR) ; // initiate sensors
+  ecrobot_set_light_sensor_active(LIGHTSENSOR);
+}
+void ecrobot_device_terminate() {
+  ecrobot_term_sonar_sensor(ULTRASONICSENSOR) ; // turn sensors off
+  ecrobot_set_light_sensor_inactive(LIGHTSENSOR);
+}
+
+void user_1ms_isr_type2(void){ (void)SignalCounter(SysTimerCnt); } 
+
+void change_driving_command(int priority, int speed, int duration) {
+  /* If a new driving command is sent, overwrite the previous if the new
+     command has higher priority than the current. */
+  if (priority >= dc.priority) {
+    dc.priority = priority;
+    dc.speed = speed;
+    dc.duration = duration;
+  }
+}
+
+/* This function will print the light intensity on the LCD */
+void display_light_intensity() {
+  display_clear(1);
+  display_goto_xy(0,0);
+  display_string("Light:  ");
+  display_unsigned(LIGHTVAL, 3);
+  display_update();
+}
+
+/*  This function will take 10 light intensity values, waiting 100ms between each measurement
+    and return the mean measurement value. This is used for initial calibration */
+int light_calibration_proc() {
+  int threshold = 0;
+  for (int i=0;i<10;i++){
+    threshold += LIGHTVAL;
+    systick_wait_ms(100);
+  }
+  return threshold /= 10;
+}
+
+/* If the button is pressed, reverse for 1 second
+   (actually, from pressed and for approximately one second after release time) */
+TASK(ButtonpressTask){
+  if (TOUCHVAL)
+    change_driving_command(PRIO_BUTTON, -100, 1000); 		
+  TerminateTask();
+}
+
+TASK(DisplayTask){
+  display_light_intensity();
+  TerminateTask();
+}
+
+/* If an obstacle is closer than 100cm away, but further than 20cm
+   move forward. (100cm because the accuracy above 100 cm is low, and we
+   also want the robot to stop, so we do not have to chase it around) */
+TASK(UltrasonicTask) {
+  int d = ULTRAVAL; /* read the ultrasonic value, see \#define */
+  if (d > 20 && d < 100)
+    /* drive forward until the next time this task is released */
+    change_driving_command(PRIO_BUTTON, 100, USTP);
+  TerminateTask();
+}
+
+TASK(MotorcontrolTask) {
+  if (dc.duration > 0){ /* if we should drive... */
+    nxt_motor_set_speed(NXT_PORT_A, dc.speed, 0); /* ... drive */
+    nxt_motor_set_speed(NXT_PORT_B, dc.speed, 0);
+    dc.duration-=MCTP; /* decrease drive time with the period of this task */
+  } else if (dc.priority != PRIO_IDLE) { 
+    /* if duration is negative or zero, stop */
+    nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+    nxt_motor_set_speed(NXT_PORT_B, 0, 1);
+    dc.priority = PRIO_IDLE;
+  }
+  TerminateTask();
+}
+
+\end{lstlisting}
+\newpage
+\subsection*{Part 3: Oil-file}
+\begin{lstlisting}[label=some-code,caption=part3.oil,mathescape]
+#include "implementation.oil"
+
+CPU ATMEL_AT91SAM7S256
+{
+  OS LEJOS_OSEK
+  {
+    STATUS = EXTENDED;
+    STARTUPHOOK = FALSE;
+    ERRORHOOK = FALSE;
+    SHUTDOWNHOOK = FALSE;
+    PRETASKHOOK = FALSE;
+    POSTTASKHOOK = FALSE;
+    USEGETSERVICEID = FALSE;
+    USEPARAMETERACCESS = FALSE;
+    USERESSCHEDULER = FALSE;
+  };
+
+  /* Definition of application mode */
+  APPMODE appmode1{};
+
+  TASK MotorcontrolTask
+  {
+    AUTOSTART = FALSE;
+    PRIORITY = 1; /* Smaller value means lower priority */
+    ACTIVATION = 1;
+    SCHEDULE = FULL;
+    STACKSIZE = 512; /* Stack size */
+
+  };
+
+  TASK UltrasonicTask
+  {
+    AUTOSTART = FALSE;
+    PRIORITY = 1; /* Smaller value means lower priority */
+    ACTIVATION = 1;
+    SCHEDULE = FULL;
+    STACKSIZE = 512; /* Stack size */
+
+  };
+
+  TASK ButtonpressTask
+  {
+    AUTOSTART = FALSE;
+    PRIORITY = 1; /* Smaller value means lower priority */
+    ACTIVATION = 1;
+    SCHEDULE = FULL;
+    STACKSIZE = 512; /* Stack size */
+  };
+
+  TASK DisplayTask
+  {
+    AUTOSTART = FALSE;
+    PRIORITY = 1; /* Smaller value means lower priority */
+    ACTIVATION = 1;
+    SCHEDULE = FULL;
+    STACKSIZE = 512; /* Stack size */
+  };
+
+	COUNTER SysTimerCnt
+  {
+    MINCYCLE = 1;
+    MAXALLOWEDVALUE = 10000;
+    TICKSPERBASE = 1; /* One tick is equal to 1msec */
+  };
+
+	ALARM cyclic_alarm
+  {
+    COUNTER = SysTimerCnt;
+    ACTION = ACTIVATETASK
+    {
+        TASK = MotorcontrolTask;
+    };
+    AUTOSTART = TRUE
+    {
+        ALARMTIME = 1;
+        CYCLETIME = 50;
+        APPMODE = appmode1;
+    };
+  };
+
+	ALARM cyclic_alarm2
+  {
+    COUNTER = SysTimerCnt;
+    ACTION = ACTIVATETASK
+    {
+        TASK = ButtonpressTask;
+    };
+    AUTOSTART = TRUE
+    {
+        ALARMTIME = 1;
+        CYCLETIME = 10;
+        APPMODE = appmode1;
+    };
+  };
+ALARM cyclic_alarm3
+  {
+    COUNTER = SysTimerCnt;
+    ACTION = ACTIVATETASK
+    {
+        TASK = DisplayTask;
+    };
+    AUTOSTART = TRUE
+    {
+        ALARMTIME = 1;
+        CYCLETIME = 100;
+        APPMODE = appmode1;
+    };
+  };
+
+ALARM cyclic_alarm4
+  {
+    COUNTER = SysTimerCnt;
+    ACTION = ACTIVATETASK
+    {
+        TASK = UltrasonicTask;
+    };
+    AUTOSTART = TRUE
+    {
+        ALARMTIME = 1;
+        CYCLETIME = 100;
+        APPMODE = appmode1;
+    };
+  };
+
+};
+
+\end{lstlisting}
+
+
+\end{document}
+

@@ -229,7 +229,7 @@ avdc_resize(avdark_cache_t *self,
 	
 		self->sets = AVDC_MALLOC(self->number_of_sets, avdc_cache_set_t);
         for (int i = 0; i < self->number_of_sets; i++){
-			self->sets[i].lines = AVDC_MALLOC(self->assoc, avdc_cache_line_t);	 // VILKEN SET SKA VI SKRIVA TILL?	
+			self->sets[i].lines = AVDC_MALLOC(self->assoc, avdc_cache_line_t);	
 		}
 
        /* Flush the cache, this initializes the tag array to a known state */

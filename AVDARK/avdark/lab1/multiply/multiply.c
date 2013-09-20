@@ -16,7 +16,7 @@
 #include <string.h>
 
 /* Size of the matrices to multiply */
-#define SIZE 650
+#define SIZE 2000
 
 /* I stole this from: http://stackoverflow.com/questions/3437404/min-and-max-in-c */
 #define min(a,b) ((a<b)?(a):(b))
@@ -47,7 +47,7 @@ matmul_opt()
          * matmul_ref() for a reference solution.
          */
 		int jj, kk, i, j, k;
-		int B = SIZE/2;
+		int B = 128;
 		double r;
 
 		for (jj = 0; jj < SIZE; jj+= B)
