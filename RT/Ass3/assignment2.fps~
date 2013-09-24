@@ -1,0 +1,49 @@
+! definition_file.fps - an example task set.
+! Global variable declarations
+scalar GlobalVar;
+
+system testing {
+  ! First and only system
+    declarations {		
+      ! Variable declarations
+      indexed Period, Deadline, CompTime, RespTime;
+      priority Priovar;	
+			      	       
+      ! Task declarations
+      tasks A, B, C, D;
+}
+
+initialise {
+	   
+	   
+	  Period[A] = 2;
+	  Period[B] = 3;
+	  Period[C] = 5;
+	  Period[D] = 4;
+	  
+	  Deadline[A] = 6;
+	  Deadline[B] = 7;
+	  Deadline[C] = 13;
+	  Deadline[D] = 60;
+	  
+	  Priovar[A] = 1;
+	  Priovar[B] = 2;
+	  Priovar[C] = 3;
+	  Priovar[D] = 4;
+	  
+	  CompTime[A] = 20;
+	  CompTime[B] = 7;
+	  CompTime[C] = 14;
+	  CompTime[D] = 100;
+
+}
+
+! Formula(s) to be iterated
+  
+  formulas {
+  	   RespTime[i] = CompTime[i] +
+	   	       	 sigma(hp, ceiling(RespTime[i] / Period[j]) * CompTime[j]);
+			 	   GlobalVar = CompTime[A] + CompTime[B] * CompTime[C];
+				   }
+}				   
+! End of definition file
