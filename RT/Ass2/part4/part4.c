@@ -10,6 +10,8 @@ DeclareCounter(SysTimerCnt);
 
 #define LIGHTSENSOR NXT_PORT_S1
 #define ULTRASONICSENSOR NXT_PORT_S3
+#define TOUCHSENSOR NXT_PORT_S2
+#define TOUCHVAL ecrobot_get_touch_sensor(TOUCHSENSOR)
 #define LIGHTVAL ecrobot_get_light_sensor(LIGHTSENSOR)
 #define ULTRAVAL ecrobot_get_sonar_sensor(ULTRASONICSENSOR)
 
@@ -30,10 +32,15 @@ void ecrobot_device_terminate() {
 void user_1ms_isr_type2(void){ (void)SignalCounter(SysTimerCnt); } 
 
 TASK(USTask) {
-  if (!gray)
-    gray = LIGHTVAL;
-    distance = ULTRAVAL;
-    TerminateTask();
+  int tempgray;
+  if (!gray) {
+    tempgray = LIGHTVAL;
+    while(!TOUCHVAL)
+      ;
+    gray = tempgray;
+  }
+  distance = ULTRAVAL;
+  TerminateTask();
 }
 
 TASK(CompetitionTask) {
