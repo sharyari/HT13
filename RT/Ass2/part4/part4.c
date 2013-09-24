@@ -4,63 +4,20 @@
 #include "kernel_id.h"
 #include "ecrobot_interface.h"
 
-DeclareTask(HelloworldTask);
-DeclareTask(MotorcontrolTask);
-DeclareTask(EventdispatcherTask);
+
 DeclareTask(CompetitionTask);
-
-DeclareResource(DisplayTaskLock);
-
 DeclareCounter(SysTimerCnt);
 
 #define LIGHTSENSOR NXT_PORT_S1
-#define TOUCHSENSOR NXT_PORT_S2
 #define ULTRASONICSENSOR NXT_PORT_S3
 #define LIGHTVAL ecrobot_get_light_sensor(LIGHTSENSOR)
 #define ULTRAVAL ecrobot_get_sonar_sensor(ULTRASONICSENSOR)
-#define TOUCHVAL ecrobot_get_touch_sensor(TOUCHSENSOR)
-#define PRIO_IDLE 10
-#define PRIO_BUTTON 20
-#define MCTP 10
-#define BPTP 100
-#define DTP 100
-#define USTP 10
-#define CALIBRATESPEED 100
-#define PREFERREDSPEED 100
-int TURNSPEED = 75;
-#define COLOR_THRESHOLD 20
 
-#define DEBUG_MODE 0
-
-
-int drifttime = 0;
-int counter;
 int distance;
-int firstrun = 3;
-int color[3];
-
-enum TURN {LEFT, RIGHT, FORW};
-
-struct dc_t {
-    int duration; // was unsigned.
-    S32 speed;
-    int priority;
-	int t;
-} dc = {0, 0, PRIO_IDLE};
-
-
-void change_driving_command(int priority, int speed, int duration, int t) {
-	if (priority >= dc.priority) {
-		dc.priority = priority;
-		dc.speed = speed;
-		dc.duration = duration;
-		dc.t = t;
-	}
-}
-
+int gray = 0;
 
 void ecrobot_device_initialize() {
-	counter = 0; distance = 0;
+	distance = 0;
 	ecrobot_init_sonar_sensor(ULTRASONICSENSOR) ;
 	ecrobot_set_light_sensor_active(LIGHTSENSOR);
 }
@@ -70,122 +27,27 @@ void ecrobot_device_terminate() {
 	ecrobot_set_light_sensor_inactive(LIGHTSENSOR);
 }
 
-void display_light_intensity() {
-      display_clear(1);
-      display_goto_xy(0,0);
-      display_unsigned(LIGHTVAL, 3);
-      display_update();
-}
-
 void user_1ms_isr_type2(void){ (void)SignalCounter(SysTimerCnt); } 
 
-int light_calibration_proc() {
-  int threshold = 0;
-  for (int i=0;i<10;i++){
-    threshold += LIGHTVAL;
-    systick_wait_ms(100);
-  }
-  return threshold /= 10;
-}
-
-void calibrate() {
-	int a[3];
-	for (int i=0;i<3;i++){
-			a[i] = LIGHTVAL;
-			systick_wait_ms(10);
-	}
-	color[firstrun] = (a[0]+a[1]+a[2])/3; 
-	change_driving_command(PRIO_BUTTON, CALIBRATESPEED, 400, FORW);
-	systick_wait_ms(500);
-}
-
-
-TASK(ButtonpressTask){
-	if (TOUCHVAL)
-		change_driving_command(PRIO_BUTTON, -PREFERREDSPEED, 1000, FORW);
-	TerminateTask();
-}
-
-TASK(DisplayTask) {
-
-	// Only allow one instance of DisplayTask to run at a time.
-	GetResource(DisplayTaskLock);
-	
-	if (firstrun){
-		firstrun--;
-		calibrate();
-	} else if(DEBUG_MODE) {
-		display_string("[");
-		display_int(color[0],3);
-		display_string(",");
-		display_int(color[1],3);
-		display_string(",");
-		display_int(color[2],3);
-		display_string("]");
-		display_update();
-	}
-
-	if(DEBUG_MODE) {
-		display_int(firstrun,1);
-		display_update();
-	}
-	
-	// Allow the next DisplayTask to start.
-	ReleaseResource(DisplayTaskLock);
-
-	TerminateTask();
+TASK(USTask) {
+  if (!gray)
+    gray = LIGHTVAL;
+    distance = ULTRAVAL;
+    TerminateTask();
 }
 
 TASK(CompetitionTask) {
-  if (firstrun)
-    TerminateTask();
   int l = LIGHTVAL;
-  if (counter < USTP)
-    distance = ULTRAVAL;
-  else
-    counter = (counter+USTP%100);
-  if (distance > 20 /*&& distance < 100*/) {
-    // PRE: We are tracking the inner circuit, clockwise.
-    if(l > color[0] - COLOR_THRESHOLD) {
-      // Read black, the track is turning right.
-      drifttime=(drifttime+1)%100;
-      change_driving_command(PRIO_BUTTON, PREFERREDSPEED, MCTP, RIGHT);		
-    } else if(l < color[2] + COLOR_THRESHOLD) {
-      drifttime=(drifttime+1)%100;
-      // Read white, the track is turning left.
-      change_driving_command(PRIO_BUTTON, PREFERREDSPEED, MCTP, LEFT);
-    } else {
-      // Read brown, the track is straight.
-      drifttime=0;
-      change_driving_command(PRIO_BUTTON, PREFERREDSPEED, MCTP, FORW);
-    }
+    nxt_motor_set_speed(NXT_PORT_A, 100, 0);
+    nxt_motor_set_speed(NXT_PORT_B, 100, 0);
+  if (distance > 20)
+    if(l < gray)
+      nxt_motor_set_speed(NXT_PORT_B, 50, 1);
+    else
+      nxt_motor_set_speed(NXT_PORT_A, 50, 1);
+  else { 
+    nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+    nxt_motor_set_speed(NXT_PORT_B, 0, 1);
   }
-  
   TerminateTask();
 }
-
-TASK(MotorcontrolTask) {
-	int leftw = dc.speed; int rightw = dc.speed;
-	if (dc.duration > 0){
-		if (dc.t == LEFT){
-		  rightw = TURNSPEED-drifttime;
-		} else if (dc.t == RIGHT){
-		  leftw = TURNSPEED-drifttime;
-		} 
-		nxt_motor_set_speed(NXT_PORT_A, leftw, 0);
-   		nxt_motor_set_speed(NXT_PORT_B, rightw, 0);
-		dc.duration -= MCTP;
-		if(DEBUG_MODE) {
-			display_string("M");
-			display_update();
-		}
-	} else if (dc.priority == PRIO_IDLE)
-		;
-	else {
-	    nxt_motor_set_speed(NXT_PORT_A, 0, 1);
-	    nxt_motor_set_speed(NXT_PORT_B, 0, 1);
-		dc.priority = PRIO_IDLE;
-	}
-	TerminateTask();
-}
-
