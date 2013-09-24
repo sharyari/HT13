@@ -90,10 +90,27 @@ TASK(DisplayTask){
    move forward. (100cm because the accuracy above 100ms is low, and we
    also want the robot to stop, so we don't have to chase it around) */
 TASK(UltrasonicTask) {
+  int preferred_speed = 95;
   int d = ULTRAVAL; /* read the ultrasonic value, see #define */
-  if (d > 20 && d < 100)
-    /* drive forward until the next time this task is released */
-    change_driving_command(PRIO_BUTTON, 100, USTP);
+
+  // If we are not at around 20 cm from the object in front of us.
+  if (d > 21 || d < 19) {
+  
+    // Decrease the speed if we are close to the target distance.
+    double temp = preferred_speed * ((d-20)/6);
+    int speed = temp;
+
+    // Make sure we keep within the preferred speed interval.
+    if(speed < -preferred_speed)
+      speed = -preferred_speed; 
+    else if(speed > preferred_speed) 
+      speed = preferred_speed;
+    
+    // Send drive command, at lower prio than reverse button.
+    change_driving_command(PRIO_BUTTON - 1, speed, USTP);
+    
+  }
+
   TerminateTask();
 }
 
