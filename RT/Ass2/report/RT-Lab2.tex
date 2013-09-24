@@ -280,7 +280,7 @@ CPU ATMEL_AT91SAM7S256
 
 \section*{Part 3: Periodic Scheduling}
 
-The third part of the lab consists of adding an ultra sonic sensor, which is used to measure distance, to the robot. The robot software is updated to use the sensor to keep a distance of 20 cm to the object in front of it.
+The third part of the lab consists of adding an ultra sonic sensor, which is used to measure distance, to the robot. The robot software is updated to use the sensor to keep a distance of around 20 cm to the object in front of it.
 
 The updated robot software still includes the \texttt{MotorcontrolTask} from the previous part, but not the \texttt{EventdispatcherTask}, since we are now driving the robot with scheduled tasks instead of events. This also introduces changes to the \texttt{MotorcontrolTask}, which is no longer waiting for events. Three new tasks are introduced, the \texttt{ButtonpressTask}, \texttt{DisplayTask} and \texttt{UltrasonicTask}, handling the pressing of the button, displaying the light intensity and measuring the distance to the object in front of the robot, respectively.
 
@@ -382,14 +382,30 @@ TASK(DisplayTask){
   TerminateTask();
 }
 
-/* If an obstacle is closer than 100cm away, but further than 20cm
-   move forward. (100cm because the accuracy above 100 cm is low, and we
-   also want the robot to stop, so we do not have to chase it around) */
+/* If an obstacle is further than 21 cm move forward, if closer than 19,
+   move backwards. */ 
 TASK(UltrasonicTask) {
-  int d = ULTRAVAL; /* read the ultrasonic value, see \#define */
-  if (d > 20 && d < 100)
-    /* drive forward until the next time this task is released */
-    change_driving_command(PRIO_BUTTON, 100, USTP);
+  int preferred_speed = 95;
+  int d = ULTRAVAL; /* read the ultrasonic value, see #define */
+
+  // If we are not at around 20 cm from the object in front of us.
+  if (d > 21 || d < 19) {
+  
+    // Decrease the speed if we are close to the target distance.
+    double temp = preferred_speed * ((d-20)/6);
+    int speed = temp;
+
+    // Make sure we keep within the preferred speed interval.
+    if(speed < -preferred_speed)
+      speed = -preferred_speed; 
+    else if(speed > preferred_speed) 
+      speed = preferred_speed;
+    
+    // Send drive command, at lower prio than reverse button.
+    change_driving_command(PRIO_BUTTON - 1, speed, USTP);
+    
+  }
+
   TerminateTask();
 }
 

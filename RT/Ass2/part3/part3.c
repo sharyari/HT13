@@ -86,9 +86,8 @@ TASK(DisplayTask){
   TerminateTask();
 }
 
-/* If an obstacle is closer than 100cm away, but further than 20cm
-   move forward. (100cm because the accuracy above 100ms is low, and we
-   also want the robot to stop, so we don't have to chase it around) */
+/* If an obstacle is further than 21 cm move forward, if closer than 19,
+   move backwards. */ 
 TASK(UltrasonicTask) {
   int preferred_speed = 95;
   int d = ULTRAVAL; /* read the ultrasonic value, see #define */
