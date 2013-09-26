@@ -18,6 +18,11 @@ CPU ATMEL_AT91SAM7S256
   /* Definition of application mode */
   APPMODE appmode1{};
 
+  /* Kompl: Define a lock to be used when changing global driving commands. */
+  RESOURCE DriveCommandLock {
+	RESOURCEPROPERTY = STANDARD;
+  };
+  
   TASK MotorcontrolTask
   {
     AUTOSTART = FALSE;
@@ -34,6 +39,7 @@ CPU ATMEL_AT91SAM7S256
     PRIORITY = 1; /* Smaller value means lower priority */
     ACTIVATION = 1;
     SCHEDULE = FULL;
+	RESOURCE = DriveCommandLock;		/* Kompl: UltrasonicTask uses the lock. */
     STACKSIZE = 512; /* Stack size */
 
   };
@@ -44,6 +50,7 @@ CPU ATMEL_AT91SAM7S256
     PRIORITY = 1; /* Smaller value means lower priority */
     ACTIVATION = 1;
     SCHEDULE = FULL;
+	RESOURCE = DriveCommandLock;		/* Kompl: ButtonpressTask uses the lock */
     STACKSIZE = 512; /* Stack size */
   };
 

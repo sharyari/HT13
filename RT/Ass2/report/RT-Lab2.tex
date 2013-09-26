@@ -307,6 +307,9 @@ DeclareTask(UltrasonicTask);
 
 DeclareCounter(SysTimerCnt);
 
+// Kompl: Declare lock used for changing global driving commands.
+DeclareResource(DriveCommandLock);
+
 #define LIGHTSENSOR NXT_PORT_S1
 #define TOUCHSENSOR NXT_PORT_S2
 #define ULTRASONICSENSOR NXT_PORT_S3
@@ -343,9 +346,16 @@ void change_driving_command(int priority, int speed, int duration) {
   /* If a new driving command is sent, overwrite the previous if the new
      command has higher priority than the current. */
   if (priority >= dc.priority) {
+	
+	// Kompl: Only allow exclusive access the changing of global driving commands.
+	GetResource(DriveCommandLock);
+  
     dc.priority = priority;
     dc.speed = speed;
     dc.duration = duration;
+	
+	// Kompl: Release the lock when we have changed the global driving commands.
+	ReleaseResource(DriveCommandLock);
   }
 }
 
@@ -447,6 +457,11 @@ CPU ATMEL_AT91SAM7S256
   /* Definition of application mode */
   APPMODE appmode1{};
 
+  /* Kompl: Define a lock to be used when changing global driving commands. */
+  RESOURCE DriveCommandLock {
+	RESOURCEPROPERTY = STANDARD;
+  };
+  
   TASK MotorcontrolTask
   {
     AUTOSTART = FALSE;
@@ -463,6 +478,7 @@ CPU ATMEL_AT91SAM7S256
     PRIORITY = 1; /* Smaller value means lower priority */
     ACTIVATION = 1;
     SCHEDULE = FULL;
+	RESOURCE = DriveCommandLock;		/* Kompl: UltrasonicTask uses the lock. */
     STACKSIZE = 512; /* Stack size */
 
   };
@@ -473,6 +489,7 @@ CPU ATMEL_AT91SAM7S256
     PRIORITY = 1; /* Smaller value means lower priority */
     ACTIVATION = 1;
     SCHEDULE = FULL;
+	RESOURCE = DriveCommandLock;		/* Kompl: ButtonpressTask uses the lock */
     STACKSIZE = 512; /* Stack size */
   };
 

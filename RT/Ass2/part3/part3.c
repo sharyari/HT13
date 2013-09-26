@@ -11,6 +11,9 @@ DeclareTask(UltrasonicTask);
 
 DeclareCounter(SysTimerCnt);
 
+// Kompl: Declare lock used for changing global driving commands.
+DeclareResource(DriveCommandLock);
+
 #define LIGHTSENSOR NXT_PORT_S1
 #define TOUCHSENSOR NXT_PORT_S2
 #define ULTRASONICSENSOR NXT_PORT_S3
@@ -47,9 +50,16 @@ void change_driving_command(int priority, int speed, int duration) {
   /* If a new driving command is sent, overwrite the previous if the new
      command has higher priority than the current. */
   if (priority >= dc.priority) {
+	
+	// Kompl: Only allow exclusive access the changing of global driving commands.
+	GetResource(DriveCommandLock);
+  
     dc.priority = priority;
     dc.speed = speed;
     dc.duration = duration;
+	
+	// Kompl: Release the lock when we have changed the global driving commands.
+	ReleaseResource(DriveCommandLock);
   }
 }
 
