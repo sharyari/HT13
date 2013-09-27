@@ -8,7 +8,8 @@ DeclareTask(MotorcontrolTask);
 DeclareTask(EventdispatcherTask);
 DeclareEvent(TouchOnEvent);
 DeclareEvent(TouchOffEvent);
-DeclareEvent(LightChangeEvent);
+DeclareEvent(LightOnEvent);
+DeclareEvent(LightOffEvent);
 
 #define LIGHTSENSOR NXT_PORT_S1
 #define TOUCHSENSOR NXT_PORT_S2
@@ -39,29 +40,35 @@ int light_calibration_proc() {
   int threshold = 0;
   for (int i = 0; i < 10; i++){
     threshold += LIGHTVAL;
-    systick_wait_ms(100);
+    systick_wait_ms(10);
   }
   return threshold /= 10;
 }
 
 TASK(EventdispatcherTask){
-  /* state is TRUE when the button is pressed, else FALSE */ 
-  int state = FALSE;
+  /* buttonState is TRUE when the button is pressed, else FALSE */ 
+  int buttonState = FALSE;
+  /* tableState is TRUE when we are on the table, otherwise FALSE */
+  int tableState = TRUE;
+
   /* Threshold holds the initial light settings. The robot must be on the working surface when initialized */	
   int threshold = light_calibration_proc();
   
   while (TRUE) { /* Forever! */
-    if (state != TOUCHVAL) { /* If state has changed */
-      state = !state; /* State changed, so we update the variable */
-      if (state) /* If button pressed */
-	SetEvent(MotorcontrolTask, TouchOnEvent); /* Signal motors to run */
+    if (buttonState != TOUCHVAL) { /* If button state has changed */
+      buttonState = !buttonState; /* State changed, so we update the variable */
+      if (buttonState) /* If button pressed */
+	SetEvent(MotorcontrolTask, TouchOnEvent); /* Signal motors ok to run */
       else
-	SetEvent(MotorcontrolTask, TouchOffEvent); /* Signal motors to stop */
+	SetEvent(MotorcontrolTask, TouchOffEvent); /* Signal motors must stop */
     }
     
-    if (state && LIGHTVAL >= threshold*1.05){ /* If we're running, and the table can't be detected */
-      SetEvent(MotorcontrolTask, LightChangeEvent); /* Stop the motors */
-      state = !state;
+    if (tableState != (LIGHTVAL >= threshold*1.05)){ /* If the table state has changed */
+      tableState = !tableState;
+      if(tableState)
+	SetEvent(MotorcontrolTask, LightOffEvent); /* Signal motors must stop */
+      else
+	SetEvent(MotorcontrolTask, LightOnEvent); /* Signal motors ok to run */
     }
     display_light_intensity(); /* Update the light values on the display*/
     systick_wait_ms(100); /* Do we need this? */
@@ -69,18 +76,48 @@ TASK(EventdispatcherTask){
 }
 
 TASK(MotorcontrolTask) {
+  
+  int table = FALSE;
+  int button = FALSE;
+  int okToDrive = FALSE;
+  
+  EventMaskType eventmask = 0;
+  
   while(true) {
-    WaitEvent(TouchOnEvent); /* Wait until told to drive */
-    ClearEvent(TouchOnEvent);
-    nxt_motor_set_speed(NXT_PORT_A, 100, 0);
-    nxt_motor_set_speed(NXT_PORT_B, 100, 0);
-    
-    /* Wait for a break command, either from a button release or because the table went undetected */
-    WaitEvent(TouchOffEvent | LightChangeEvent); 
-    ClearEvent(TouchOffEvent);   
-    ClearEvent(LightChangeEvent);
-    nxt_motor_set_speed(NXT_PORT_A, 0, 1); /* Break */
-    nxt_motor_set_speed(NXT_PORT_B, 0, 1);
+
+    /* The only time we have to reevaluate if it is ok to run is when something changes, so wait for the events. */
+    WaitEvent(TouchOnEvent | LightOnEvent | TouchOffEvent | LightOffEvent);
+    GetEvent(MotorcontrolTask, &eventmask);
+
+    /* Set the state of button and table according to the recieved event. */
+    if(eventmask & TouchOnEvent) {
+      button = TRUE;
+      ClearEvent(TouchOnEvent);
+    }
+    else if(eventmask & TouchOffEvent) {
+      button = FALSE;
+      ClearEvent(TouchOffEvent);
+    }
+    else if(eventmask & LightOnEvent) {
+      table = TRUE;
+      ClearEvent(LightOnEvent);
+    }
+    else if(eventmask & LightOffEvent) {
+      table = FALSE;
+      ClearEvent(LightOffEvent);
+    }
+
+    /* Update the OK to drive flag if all prerequisites are met. */
+    if(button && table && !okToDrive) {
+      okToDrive = TRUE;
+      nxt_motor_set_speed(NXT_PORT_A, 100, 0);
+      nxt_motor_set_speed(NXT_PORT_B, 100, 0);
+    } else if((!button || !table) && okToDrive) {
+      okToDrive = FALSE;
+      nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+      nxt_motor_set_speed(NXT_PORT_B, 0, 1);
+    }
+
   }
 }
 

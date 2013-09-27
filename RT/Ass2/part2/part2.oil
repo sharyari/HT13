@@ -20,7 +20,8 @@ CPU ATMEL_AT91SAM7S256
 
   EVENT TouchOnEvent { MASK = AUTO; };
   EVENT TouchOffEvent { MASK = AUTO; };
-  EVENT LightChangeEvent { MASK = AUTO; };	
+  EVENT LightOnEvent { MASK = AUTO; };	
+  EVENT LightOffEvent { MASK = AUTO; };
 
   TASK MotorcontrolTask
   {
@@ -34,7 +35,8 @@ CPU ATMEL_AT91SAM7S256
     STACKSIZE = 512; /* Stack size */
     EVENT = TouchOnEvent;
     EVENT = TouchOffEvent;
-    EVENT = LightChangeEvent;
+    EVENT = LightOnEvent;
+    EVENT = LightOffEvent;
   };
 
 
