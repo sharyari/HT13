@@ -129,39 +129,51 @@ escapeinside={\#*}{\^^M}
 	\item \emph{Will all tasks complete before their deadlines according to the schedulability formula? Draw a critical instant schedule for the given tasks (have all tasks simultaneously released at time 6). What is the system utilization threshold?}
 	
 	\answer $U_1 = \frac{2}{10} = 0.2$ \\
-	$U_2 = \frac{4}{15} = 0.266$ \\
+	$U_2 = \frac{4}{15} = 0.2666$ \\
 	$U_3 = \frac{10}{35} = 0.2857$ \\
 	$U = U_1 + U_2 + U_3 = 0.7532$
 	
 	Utilization bound: $n(2^{1/n} - 1) \Rightarrow 3(2^(1/3) - 1) = \textbf{0.7797}$
 	
-	We can see that $0.7797$ is smaller than $U = 0.7523$, which means that the system is schedulable.
+	We can see that $0.7797$ is smaller than $U = 0.7523$, which means that the system is schedulable, according to the formula.
 	
-	\todo{figur}
+	\todo{photoshopfigur}
 	
 	\item \emph{Assume that we want to increase the computation time for task $\tau_1$ to be $C_1 = 4$. Will all tasks complete before their deadlines? Draw a critical instant schedule for the given tasks. What is the system utilization bound?}
 	
-	\answer $U_1$ is now 0.4, giving $U = 0.9523$, which means that it is not guaranteed to be schedulable \todo{svarar på mer än frågan?} according to the formula.
-	
-	\todo{figur}
-	
-	At time 36, all tasks have been finished, thus this is schedulable according to our assumption about critical instant.
+	\answer $U_1$ is now 0.4, giving $U = 0.9523$, which means that it is not guaranteed to be schedulable according to the formula.
+
+	\begin{figure}
+	\includegraphics[scale=0.4]{1_3_low}
+	\caption{Critical instant schedule, corresponding to assignment 1.3}
+	\label{1_3}
+	\end{figure}
+
+	At time 36, all tasks have been finished, thus this is schedulable according to our assumption about critical instants, see figure \ref{1_3}.
 	
 	\item \emph{Assume that we want to increase the computation time for task $\tau_1$ to be $C_1 = 5$. Will all tasks complete before their deadlines? Draw a critical instant schedule for the given tasks. What is the system utilization bound?}
 	
-	\answer $U_1$ is now 0.5, giving us $U = 1.0523$, also not guaranteed to be schedulable. 
+	\answer $U_1$ is now 0.5, giving us $U = 1.0523$, also not guaranteed to be schedulable.
 	
-	\todo{figure}
+	\begin{figure}
+	\includegraphics[scale=0.4]{1_4_low}
+	\caption{Critical instant schedule, corresponding to assignment 1.4. $\tau_3$ misses its deadline at 41.}
+	\label{1_4}
+	\end{figure}
 	
-	At time 41, $\tau_3$ should have been finished, but has only executed for $6 ms$ of the total of $10 ms$. Therefore $U_1 = 0.5$ is not schedulable.
+	At time 41, $\tau_3$ should have been finished, but has only executed for $6 ms$ of the total of $10 ms$. Therefore $U_1 = 0.5$ is not schedulable, see figure \ref{1_4}.
 	
-	\item \emph{Assume that we instead of modifying $\tau_1$ (set $C_1 = 2$), want to increase the comutation time for task $\tau_3$ to be $C_3 = 17$. Will all tasks complete before their deadlines? Draw a critical instant schedule for the given tasks. What is the system utilization bound?}
+	\item \emph{Assume that we instead of modifying $\tau_1$ (set $C_1 = 2$), want to increase the computation time for task $\tau_3$ to be $C_3 = 17$. Will all tasks complete before their deadlines? Draw a critical instant schedule for the given tasks. What is the system utilization bound?}
 	
-	\answer $U_3 = \frac{17}{35} = 0.4857$, giving $U = 0.9523$. The utilization is now the same as in 1.3 which turned out to be schedulable.
+	\answer $U_3 = \frac{17}{35} = 0.4857$, giving $U = 0.9523$.
 	
-	\todo{figure}
+	\begin{figure}
+	\includegraphics[scale=0.4]{1_5_low}
+	\caption{Critical instant schedule, corresponding to assignment 1.5. $\tau_3$ again misses its deadline at 41.}
+	\label{1_5}
+	\end{figure}
 	
-	$\tau_3$ had a deadline at 41, but has only executed $15 ms$ at that time, and did therefore not meet its deadline, even though the utilization was as in 1.3, where it was schedulable.
+	$\tau_3$ had a deadline at 41, but has only executed $15 ms$ at that time, see figure \ref{1_5}. It did therefore not meet its deadline, even though the utilization was exactly the same as in 1.3, which turned out to be schedulable.
 	
 	\item \emph{What conclusion can you draw from all this for the schedulability formula?}
 	
@@ -171,9 +183,9 @@ escapeinside={\#*}{\^^M}
 	
 	\item \emph{Insert the task set given in FpsCalc and calculate the response time of each task. What is the worst-case response time for each task using FpsCalc? Verify that the times correspond to the times you extracted using a critical instant schedule. In the worst case schenario, how many instances of $\tau_1$ and $\tau_2$ respectively can appear during one execution of $\tau_3$? How does this value relate to the $\ceil{\frac{R_i}{T_j}}$ expression? How long time of the worst case response time of $\tau_3$ is spent waiting for instances of $\tau_1$ and $\tau_2$ respectively?}
 	
-	\answer According to FpsCalc, $R_1 = 2$, $R_2 = 6$ and $R_3 = 24$ which is what we can see in the critical execution diagram in 1.2.
+	\answer According to FpsCalc, $R_1 = 2$, $R_2 = 6$ and $R_3 = 24$ which is what we can see in the critical execution diagram in \ref{1_2}.
 	
-	During one execution of $\tau_3$, three executions of $\tau_1$ and two executions of $\tau_2$ can occur. These values are equal to the values in $\ceil{\frac{R_i}{T_j}}$. In this case:
+	During one execution of $\tau_3$, three executions of $\tau_1$ and two executions of $\tau_2$ can occur. These values are equal to the values in $\ceil{\frac{R_i}{T_j}}$. In the case of $\tau_3$:
 	
 	$\ceil{\frac{R_3}{T_1}} = \ceil{\frac{24}{10}} = 3$ and $\ceil{\frac{R_3}{T_2}} = \ceil{\frac{24}{15}} = 2$.
 	
@@ -184,19 +196,12 @@ escapeinside={\#*}{\^^M}
 	The code used to calculate the above values follows:
 	
 \begin{lstlisting}
-! Global variable declarations
-
 system testing {
-	! First and only system
 	declarations {		
-		! Variable declarations
 		indexed Period, Deadline, CompTime, RespTime;
 		priority Priovar;	
-			      	       
-		! Task declarations
 		tasks A, B, C;
 	}
-
 	initialise {
 		Period[A] = 10;
 		Period[B] = 15;
@@ -214,16 +219,12 @@ system testing {
 		CompTime[B] = 4;
 		CompTime[C] = 10;
 	}
-
-	! Formula(s) to be iterated
 	formulas {
 		RespTime[i] = CompTime[i] +
 			sigma(hp, ceiling(RespTime[i] / Period[j]) * CompTime[j]);
 			GlobalVar = CompTime[A] + CompTime[B] * CompTime[C];
 	}
 }				   
-! End of definition file
-
 \end{lstlisting}
 
 When running this in FpsCalc, we get the following output:
@@ -246,16 +247,14 @@ RespTime[C] = 24.000000
 \begin{enumerate}
 	\item \emph{Given the task set, what is the priority ordering for the tasks using the DM priority ordering? What is the priority ordering using RM priority ordering? Use FpsCalc to calculate the response time for the tasks in both orderings. Will all tasks complete before their deadlines?}
 	
-	\answer The priority ordering for the tasks are (from highest to lowest priority):
+	\answer The priority ordering for the tasks are:
 	
 	DM: $\tau_1$, $\tau_2$, $\tau_3$, $\tau_4$.
 	RM: $\tau_2$, $\tau_3$, $\tau_1$, $\tau_4$.
 	
-	With DM scheduling, it is schedulable with response times $R_1 = 2$, $R_2 = 5$, $R_3 = 13$ and $R_4 = 54$.
+	All priority listings in this report are written from highest (left) to lowest (right). With DM scheduling, it is schedulable with response times $R_1 = 2$, $R_2 = 5$, $R_3 = 13$ and $R_4 = 54$. With RM scheduling, the response times are $R_1 = 13$, $R_2 = 3$, $R_3 = 11$, $R_4 = 54$, which means that $\tau_1$ did not meet its deadline at $6ms$.
 	
-	With RM scheduling, the response times are $R_1 = 13$, $R_2 = 3$, $R_3 = 11$, $R_4 = 54$, which means that $\tau_1$ did not meet its deadline at $6ms$.
-	
-	\todo{LSTLISTING}
+	\todo{Tycker inte vi behöver ha med fpscalc-resultaten?}
 	
 	\item \emph{Sometimes it is preferable to not use strict RM or DM priority assignment when giving priorities to tasks. This can for exampke happen when we want to give a task with low deadline demands a better service rate or when the system is part of a larger distributed system. Find two different priority assignments of the tasks which is neither RM or DM and where deadlines are missed and met respectively.}
 	
@@ -264,12 +263,13 @@ RespTime[C] = 24.000000
 	$R_1 = 5 (< 6)$, $R_2 = 3 (< 7)$, $R_3 = 13 (= 13)$ and $R_4 = 54 (< 60)$. 
 	
 	This means that all tasks meet their deadlines.
+
 	
 	Another order is $\tau_1$, $\tau_3$, $\tau_2$, $\tau_4$, which will lead to $\tau_2$ not meeting its deadline. The response times are
 	
 	$R_1 = 2 (< 6)$, $R_2 = 10 (> 7)$, $R_3 = 7 (< 13)$ and $R_4 = 54 (< 60)$.
 	
-	\todo{LSTLISTING}
+	\todo{Tycker inte vi behöver ha med fpscalc-resultaten?}
 	
 	\item \emph{Assume that we want to implement the tasks on a RT-kernel that only supports 3 priority levels and where tasks with the same priority will be handled in FIFIO order by the scheduler. Assume that task $\tau_2$ and $\tau_3$ are set to have the same priority and that we use a DM priority assignment.}
 	
@@ -280,7 +280,7 @@ RespTime[C] = 24.000000
 	\answer The formula will now be (assuming that the current task is included in $ep(i)$):
 	
 	\begin{equation*}
-		R_i = \sum_{hp(i)}{\ceil{\frac{R_i}{T_j}}C_j} + \sum_{ep(i)}{C_j}
+		R_i = \sum_{j \in hp(i)}{\ceil{\frac{R_i}{T_j}}C_j} + \sum_{j \in ep(i)}{C_j}
 	\end{equation*}
 	
 	Since $\tau_i$ is a task with the same priority as itself, the constant $C_i$ is removed. The second $\Sigma$ shows that a task with equal priority will be run at most once before $\tau_i$, thus the ceiling operator is not needed.
@@ -294,7 +294,9 @@ RespTime[C] = 24.000000
 	In FpsCalc, the formula is:
 	
 	\begin{lstlisting}
-	RespTime[i] = sigma(hp, ceiling(RespTime[i] / Period[j]) * CompTime[j]) + sigma(ep, CompTime[j])
+	RespTime[i] =
+			sigma(hp, ceiling(RespTime[i] / Period[j]) * CompTime[j])
+			+ sigma(ep, CompTime[j])
 	\end{lstlisting}
 	
 	We can conclude that fixed priority-level machines might affect performance. Also, the worst-case response time of all tasks with the same priority will be the same.
@@ -309,15 +311,16 @@ RespTime[C] = 24.000000
 	\answer The formula for taking context switch times into consideration is:
 	
 	\begin{equation*}
-	R_i = C_i + C_{save} + C_{load} + \sum_{j \exists hp(i)}{\ceil{\frac{R_i}{T_j}} (C_j + 2(C_{save} + C_{load}))}
+	R_i = C_i + C_{save} + C_{load} + \sum_{j \in hp(i)}{\ceil{\frac{R_i}{T_j}} (C_j + 2(C_{save} + C_{load}))}
 	\end{equation*}
 	
 	This formula expressed in the FpsCalc definition file is:
 	
 	\begin{lstlisting}
-	WCRespTimeCS[i] = CompTime[i] + CSload + CSsave + 
-		sigma(hp, ceiling(WCRespTimeCS[i] / Period[j]) * (CompTime[j] +
-		2 * (CSload + CSsave)));
+	WCRespTimeCS[i] =
+			 CompTime[i] + CSload + CSsave 
+			+ sigma(hp, ceiling(WCRespTimeCS[i] / Period[j]) * (CompTime[j]
+			+ 2 * (CSload + CSsave)));
 	\end{lstlisting}
 	
 	\item \emph{To illustrate the time needed for context switches, draw a scheme where a task $\tau_i$ arrives and starts executing for the first time, executes for a while, gets preempted by a higher priority task $\tau_j$, which also executes for a while. When $\tau_j$ has completed its execution $\tau_i$ will continue its execution until it is done. Make sure that you clearly show that there is a difference from when a task arrives until it starts to execute. Make also sure that the times for loading contexts, saving contexts, and executing normally are distinguishable. Finally, make sure that your extended schedulability formula in 1 actually captures all time used for context switching.}
@@ -334,9 +337,9 @@ TODO
 	
 	\answer The deadlines are not all met. The results were:
 	
-	$R_1 = 2.2 (< 6)$, $R_2 = 5.6 (< 7)$, $R_3 = 17.8 (> 13)$ and $518 (> 60)$.
+	$R_1 = 2.2 (<6)$, $R_2 = 5.6 (<7)$, $R_3 = 17.8 (>13)$ and $R_4 = 518 (>60)$.
 	
-	$R_3$ and $R_4$ show that two tasks may miss their deadlines. These numbers are reasonable \todo{varför?}
+	$R_3$ and $R_4$ show that two tasks may miss their deadlines.
 	
 \end{enumerate}
 
@@ -345,20 +348,37 @@ TODO
 \begin{enumerate}
 	\item \emph{Give priorities to the tasks according to the DM priority assignment. Will all tasks always meet their deadlines?}
 	
-	ANSWER
+	\answer The priorities are $\tau_1$, $\tau_2$, $\tau_3$, $\tau_4$. They are schedulable, with $R_1 = 2 (<5)$, $R_2 = 5 (<12)$, $R_3 = 17 (< 40)$ and $R_4 = 26 (<50)$.
+
 	\item \emph{Assume that task $\tau_2$ and $\tau_4$ are sharing a semaphore $S_1$, and that $\tau_2$ and $\tau_4$ executes for at most $1 ms$ and $2 ms$ respectively in the critical section. Show, by doing a critical instant scheme that the deadline for task $\tau_2$ can be missed if semaphores and no mechanism for limiting priority inversion is used.}
 	
-	ANSWER
+	\answer In figure \ref{4_2} we see a critical instant schedule modelling this situation. The process $\tau_4$ locks the semaphore, and blocks $\tau_2$. Since $\tau_3$ has higher priority than $\tau_2$, both $\tau_4$ and $\tau_2$ are delayed, causing $\tau_2$ to miss its deadline at 12.
+
+	\begin{figure}
+	\includegraphics[scale=0.4]{4_2_low}
+	\caption{Critical instant schedule, corresponding to assignment 4.2. $\tau_2$ misses its deadline at 12.}
+	\label{4_2}
+	\end{figure}
+
 	\item \emph{Assume that task $\tau_2$ not only is sharing a semaphore $S_1$ with $\tau_4$ but also is sharing a semaphore $S_2$ with task $\tau_3$. Also assume that the times the task $\tau_2$ is accessing the semaphores $S_1$ and $S_2$ do not overlap. Show, by doing a critical instant scheme that deadline for task $\tau_2$ can be missed even though the priority inheritance protocol is used.}
 	
-	ANSWER
+	\answer In figure \ref{4_3} we see that $\tau_2$ still can miss its deadline, completing at 14 when the deadline is set at 12. This is because it is blocked not only by $\tau_4$, but also by $\tau_3$ for the times they use the semaphores.
+
+	\begin{figure}
+	\includegraphics[scale=0.4]{4_3_low}
+	\caption{Critical instant schedule, corresponding to assignment 4.2. $\tau_2$ again misses its deadline at 12.}
+	\label{4_3}
+	\end{figure}
+
 	\item \emph{What are the blocking times for the tasks using the priority inheritance protocol? Make sure that the amount of blocking corresponds to your drawn schedule.}
 	
-	ANSWER
+	\answer The $B_1 = 0$, as it has the highest priority and uses no semaphores. Likewise, $B_4 = 0$, as it has the lowest priority so no process can actually block it. Then $B_3 = 2$ which is the time it might be blocket by $\tau_4$, and $B_2 = 7$, which is the time it might be blocked by $\tau_4$ and $\tau_3$.
 	
 	\item \emph{What are the priority ceilings for the semaphores $S_1$ and $S_2$? What are the blocking times for the tasks using the immediate inheritance protocol? Explain why task $\tau_3$ can experience blocking even though it does not share any semaphore with $\tau_4$. Will all tasks complete before their deadlines?}
 	
-	ANSWER
+	\answer The priority ceiling is 2, both for $S_1$ and $S_2$, as $\tau_2$ uses both semaphores and has the highest priority among those using the semaphores. As before, $B_1$ and $B_4$ are zero. $B_2 = 5$, because it can be blocked either by $\tau_3$ or $\tau_4$ and we chose the more pessimistic value as the blocking time. Lastly, $B_3 = 2$, which is the time it can be blocked by $\tau_4$. Even though $\tau_3$ has a higher priority than $\tau_4$, if $\tau_4$ blocks $\tau_2$ it will in effect also block $\tau_3$.
+
+	All tasks will complete before the deadline using this protocol: $R_1 = 2 (<5)$, $R_2 = 10 (<12)$, $R_3 = 17 (<40)$ and $R_4 = 26 (<50)$ regardless which of the tasks blocks $\tau_2$.
 \end{enumerate}
 
 \section{Assignment 5: Jitter}
