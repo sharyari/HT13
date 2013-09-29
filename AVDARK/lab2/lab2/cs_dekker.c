@@ -22,6 +22,9 @@
 #error Memory fence macros not implemented for this platform.
 #endif
 
+#define true 1
+#define false 0
+
 static volatile int flag[2] = { 0, 0 };
 static volatile int turn = 0;
 
@@ -35,11 +38,27 @@ impl_enter_critical(int thread)
 {
         assert(thread == 0 || thread == 1);
 
+        flag[thread] = true;
+
+        // Make sure the other thread sees that we are trying to get the lock.
+        MFENCE();
+
+        while(flag[!thread]) {
+                if(turn != thread) {
+                        flag[thread] = false;
+                        while(turn != thread);
+                        flag[thread] = true;
+                        // Make sure the other thread sees that we have the lock.
+                        MFENCE();
+                }
+        }
+
         /* HINT: Since Dekker's algorithm only works for 2 threads,
          * with the ID 0 and 1, you may use !thread to get the ID the
          * other thread. */
 
         /* TASK: Implement entry code for Dekker's algorithm here */
+        
 }
 
 /**
@@ -53,6 +72,10 @@ impl_exit_critical(int thread)
         assert(thread == 0 || thread == 1);
 
         /* TASK: Implement exit code for Dekker's algorithm here */
+
+        turn = !thread;
+        flag[thread] = false;
+
 }
 
 

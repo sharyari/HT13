@@ -68,6 +68,10 @@ lh_acquire(int ** volatile l, int ** volatile i, volatile int ** volatile p)
         assert (*i == *p);
         /* BONUS TASK: Implement the acquire part of the CLH locking
          * algorithm as described in the lecture notes. */
+        **i = 1;
+        *p = asm_atomic_xchg_voidp((void **) l,(void *) *i);
+        while(**p);
+
 }
 
 /**
@@ -81,6 +85,8 @@ lh_release(int **i, int **p)
         assert (*i != *p);
         /* BONUS TASK: Implement the release part of the CLH locking
          * algorithm as described in the lecture notes. */
+        **i = 0;
+       *i = *p;
 }
 
 static void
