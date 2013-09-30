@@ -15,24 +15,24 @@ system testing {
 initialise {
 	   
 	   
-	  Period[A] = 20;
-	  Period[B] = 7;
-	  Period[C] = 14;
+	  Period[A] = 10;
+	  Period[B] = 20;
+	  Period[C] = 40;
 	  Period[D] = 100;
 	  
-	  Deadline[A] = 6;
-	  Deadline[B] = 7;
-	  Deadline[C] = 13;
-	  Deadline[D] = 60;
+	  Deadline[A] = 5;
+	  Deadline[B] = 12;
+	  Deadline[C] = 40;
+	  Deadline[D] = 50;
 	  
-	  Priovar[A] = 2;
-	  Priovar[B] = 1;
+	  Priovar[A] = 1;
+	  Priovar[B] = 2;
 	  Priovar[C] = 3;
 	  Priovar[D] = 4;
 	  
 	  CompTime[A] = 2;
 	  CompTime[B] = 3;
-	  CompTime[C] = 5;
+	  CompTime[C] = 10;
 	  CompTime[D] = 4;
 
 }

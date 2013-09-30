@@ -258,8 +258,65 @@ RespTime[C] = 24.000000
 	
 	All priority listings in this report are written from highest (left) to lowest (right). With DM scheduling, it is schedulable with response times $R_1 = 2$, $R_2 = 5$, $R_3 = 13$ and $R_4 = 54$. With RM scheduling, the response times are $R_1 = 13$, $R_2 = 3$, $R_3 = 11$, $R_4 = 54$, which means that $\tau_1$ did not meet its deadline at $6ms$.
 	
-	\todo{Tycker inte vi behöver ha med fpscalc-resultaten?}
-	
+	The Deadline-monotonic values are calculated using the following FpsCalc definition file:
+
+        \begin{lstlisting}
+! definition_file.fps - an example task set.
+! Global variable declarations
+
+system testing {
+  ! First and only system
+    declarations {		
+      ! Variable declarations
+      indexed Period, Deadline, CompTime, RespTime, WCRespTime;
+      priority Priovar;	
+			      	       
+      ! Task declarations
+      tasks A, B, C, D;
+}
+
+initialise {
+	  Period[A] = 20;
+	  Period[B] = 7;
+	  Period[C] = 14;
+	  Period[D] = 100;
+	  
+	  Deadline[A] = 6;
+	  Deadline[B] = 7;
+	  Deadline[C] = 13;
+	  Deadline[D] = 60;
+	  
+	  Priovar[A] = 1;
+	  Priovar[B] = 2;
+	  Priovar[C] = 3;
+	  Priovar[D] = 4;
+	  
+	  CompTime[A] = 2;
+	  CompTime[B] = 3;
+	  CompTime[C] = 5;
+	  CompTime[D] = 4;
+
+}
+
+! Formula(s) to be iterated
+    formulas {
+        RespTime[i] = CompTime[i] +
+	    sigma(hp, ceiling(RespTime[i] / Period[j]) * CompTime[j]);
+    }
+}				   
+
+! End of definition file
+        \end{lstlisting}
+
+        The same definition file is used to calculate the Rate-monotonic, but with the priorities changed as follows:
+
+        \begin{lstlisting}
+          Priovar[A] = 3;
+	  Priovar[B] = 1;
+	  Priovar[C] = 2;
+	  Priovar[D] = 4;
+        \end{lstlisting}
+
 	\item \emph{Sometimes it is preferable to not use strict RM or DM priority assignment when giving priorities to tasks. This can for example happen when we want to give a task with low deadline demands a better service rate or when the system is part of a larger distributed system. Find two different priority assignments of the tasks which is neither RM or DM and where deadlines are missed and met respectively.}
 	
 	\answer One order is $\tau_2$, $\tau_1$, $\tau_3$, $\tau_4$ which gives us the response times 
@@ -356,6 +413,8 @@ initialise {
 			sigma(hp, ceiling(RespTime[i] / Period[j]) * CompTime[j])
 			+ sigma(ep, CompTime[j])
 	\end{lstlisting}
+
+        The rest of the FpsCalc definition file is the same as for the previous excercise, with the change that $\tau_2$ and $\tau_3$ now have the same priorities.
 	
 	We can conclude that fixed priority-level machines might affect performance. Also, the worst-case response time of all tasks with the same priority will be the same.
 	
@@ -407,6 +466,53 @@ TODO
 	\item \emph{Give priorities to the tasks according to the DM priority assignment. Will all tasks always meet their deadlines?}
 	
 	\answer The priorities are $\tau_1$, $\tau_2$, $\tau_3$, $\tau_4$. They are schedulable, with $R_1 = 2 (<5)$, $R_2 = 5 (<12)$, $R_3 = 17 (< 40)$ and $R_4 = 26 (<50)$.
+
+        The response times have been calculated using the following FpsCalc definition file:
+
+        \begin{lstlisting}
+! definition_file.fps - an example task set.
+
+system testing {
+    ! First and only system
+    declarations {		
+        ! Variable declarations
+        indexed Period, Deadline, CompTime, RespTime, WCRespTime;
+        priority Priovar;	
+        
+        ! Task declarations
+        tasks A, B, C, D;
+    }
+
+    initialise {
+        Period[A] = 10;
+        Period[B] = 20;
+        Period[C] = 40;
+        Period[D] = 100;
+        
+        Deadline[A] = 5;
+        Deadline[B] = 12;
+        Deadline[C] = 40;
+        Deadline[D] = 50;
+        
+        Priovar[A] = 1;
+        Priovar[B] = 2;
+        Priovar[C] = 3;
+        Priovar[D] = 4;
+        
+        CompTime[A] = 2;
+        CompTime[B] = 3;
+        CompTime[C] = 10;
+        CompTime[D] = 4;
+    }
+
+    ! Formula(s) to be iterated
+    formulas {
+        RespTime[i] = CompTime[i] +
+            sigma(hp, ceiling(RespTime[i] / Period[j]) * CompTime[j]);
+    }
+}				   
+! End of definition file
+        \end{lstlisting}
 
 	\item \emph{Assume that task $\tau_2$ and $\tau_4$ are sharing a semaphore $S_1$, and that $\tau_2$ and $\tau_4$ executes for at most $1 ms$ and $2 ms$ respectively in the critical section. Show, by doing a critical instant scheme that the deadline for task $\tau_2$ can be missed if semaphores and no mechanism for limiting priority inversion is used.}
 	
