@@ -1,12 +1,16 @@
 ! definition_file.fps - an example task set.
 ! Global variable declarations
 
+scalar CSload, CSsave;
+
 system testing {
   ! First and only system
     declarations {		
       ! Variable declarations
-      indexed Period, Deadline, CompTime, RespTime, WCRespTime;
+      indexed Period, Deadline, CompTime, RespTime, WCRespTime, WCRespTimeCS, WCRespTimeOptimistCS;
       priority Priovar;	
+
+      
 			      	       
       ! Task declarations
       tasks A, B, C, D;
@@ -25,8 +29,8 @@ initialise {
 	  Deadline[C] = 13;
 	  Deadline[D] = 60;
 	  
-	  Priovar[A] = 2;
-	  Priovar[B] = 1;
+	  Priovar[A] = 1;
+	  Priovar[B] = 2;
 	  Priovar[C] = 3;
 	  Priovar[D] = 4;
 	  
@@ -34,6 +38,9 @@ initialise {
 	  CompTime[B] = 3;
 	  CompTime[C] = 5;
 	  CompTime[D] = 4;
+
+	  CSload = 0.1;
+	  CSsave = 0.1;
 
 }
 
@@ -48,6 +55,9 @@ initialise {
         WCRespTime[i] = 
 	    sigma(hp, ceiling(WCRespTime[i] / Period[j]) * CompTime[j]) +
 	    sigma(ep, CompTime[j]);
+
+	WCRespTimeCS[i] = CompTime[i] + CSload + CSsave + 
+	    sigma(hp, ceiling(WCRespTimeCS[i] / Period[j]) * (CompTime[j] + 2 *(CSload + CSsave)));
 
     }
 }				   
