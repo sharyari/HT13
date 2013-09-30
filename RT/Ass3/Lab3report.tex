@@ -405,10 +405,62 @@ TODO
 	ANSWER
 	\item \emph{For the given tasks $\tau_A$ and $\tau_B$ with DM priority ordering, what is the worst case response time for respective task assuming that we have no jitter. Will both tasks be able to finish before their deadlines?}
 	
-	ANSWER
+	\answer The worst case response time for the tasks is $R_A = 5 ms$ and $R_B = 40 ms$. Since the deadlines are $D_A = 10 ms$ and $D_B = 50 ms$ both tasks will finish before their deadlines in all cases. The value was calculated by the \texttt{RespTime} formula in the following FpsCalc definition file:
+
+	\begin{lstlisting}
+		! definition_file.fps - an example task set.
+		! Global variable declarations
+  
+		system testing {
+			! First and only system
+			declarations {		
+				! Variable declarations
+				indexed Period, Deadline, CompTime, RespTime, WCRespTimeJitter, RCRTJitter, Jitter;
+				priority Priovar;	
+      	       
+				! Task declarations
+				tasks A, B;
+			}
+
+			initialise {
+	   
+				Period[A] = 20;
+				Period[B] = 50;
+	  
+				Deadline[A] = 10;
+				Deadline[B] = 50;
+	  
+				Priovar[A] = 1;
+				Priovar[B] = 2;
+	  
+				CompTime[A] = 5;
+				CompTime[B] = 30;
+
+				Jitter[A] = 5;
+				Jitter[B] = 10;
+			}
+
+			! Formula(s) to be iterated
+			formulas {
+
+				! No jitter
+				RespTime[i] = CompTime[i] + sigma(hp, ceiling(RespTime[i] / Period[j]) * CompTime[j]);
+
+				! Jitter. w-formula.
+				RCRTJitter[i] = CompTime[i] + sigma(hp, ceiling((RCRTJitter[i] + Jitter[j]) / Period[j]) * CompTime[j]);
+	
+				! Jitter. R-formula.
+				WCRespTimeJitter[i] = RCRTJitter[i] + Jitter[i];
+    			}
+		}				   
+
+		! End of definition file
+	\end{lstlisting}
+
 	\item \emph{What is the worst case response time for respective tasks assuming that they can experience jitter? Will both tasks be able to complete before their deadlines?}
 	
-	ANSWER
+	\answer From the FpsCalc code in the previous excercise, we also get the worst case execution time for the tasks when taking jitter into account. The values calculated by the \texttt{WCRespTimeJitter} formula gives us the response times $R_A = 10 ms$ and $R_B = 55 ms$. Since the deadlines for the tasks are $D_A = 10 ms$ and $D_B = 50$, $\tau_B$ will miss its deadline.
+
 	\item \emph{Draw a task schedule for the tasks $\tau_A$ and $\tau_B$ which gives the same worst case response times as the formula. Indicate arrival, jitter, beginning of execution, execution, preemption, and completion for each task in your schedule.}
 	
 	ANSWER
