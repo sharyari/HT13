@@ -64,8 +64,8 @@ static int num_threads;
 static void
 lh_acquire(int ** volatile l, int ** volatile i, volatile int ** volatile p)
 {
-        assert (**i == 0);
-        assert (*i == *p);
+        //assert (**i == 0);
+        //assert (*i == *p);
         /* BONUS TASK: Implement the acquire part of the CLH locking
          * algorithm as described in the lecture notes. */
         **i = 1;
@@ -81,8 +81,8 @@ lh_acquire(int ** volatile l, int ** volatile i, volatile int ** volatile p)
 static void
 lh_release(int **i, int **p)
 {
-        assert (**i != 0);
-        assert (*i != *p);
+        //assert (**i != 0);
+        //assert (*i != *p);
         /* BONUS TASK: Implement the release part of the CLH locking
          * algorithm as described in the lecture notes. */
         **i = 0;
