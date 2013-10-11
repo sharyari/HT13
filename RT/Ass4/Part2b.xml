@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd'><nta><declaration>// Place global declarations here.
+int CPU1_C;
+chan CPU1_use, CPU1_done;
+int CPU2_C;
+chan CPU2_use, CPU2_done;
+
+int done_counter = 0;
+clock y;
+
+int flag[6] = {1,0,0,0,0,0};</declaration><template><name x="5" y="5">Job</name><parameter>int C1, int C2, int jobId, int dep1, int dep2</parameter><declaration>// Place local declarations here.
+</declaration><location id="id0" x="186" y="222"><name x="168" y="232">Done</name></location><location id="id1" x="208" y="56"><name x="232" y="48">RunCPU2</name></location><location id="id2" x="160" y="56"><name x="72" y="48">RunCPU1</name></location><location id="id3" x="184" y="-88"><name x="174" y="-118">Ready</name></location><init ref="id3"/><transition><source ref="id1"/><target ref="id0"/><label kind="synchronisation" x="216" y="104">CPU2_done?</label><label kind="assignment" x="216" y="88">done_counter := done_counter +1, flag[jobId] = 1</label><nail x="208" y="152"/></transition><transition><source ref="id2"/><target ref="id0"/><label kind="synchronisation" x="72" y="104">CPU1_done?</label><label kind="assignment" x="-152" y="88">done_counter := done_counter +1, flag[jobId] := 1</label><nail x="160" y="160"/></transition><transition><source ref="id3"/><target ref="id2"/><label kind="guard" x="-56" y="-32">flag[dep1] == 1 &amp;&amp; flag[dep2] == 1</label><label kind="synchronisation" x="80" y="0">CPU1_use!</label><label kind="assignment" x="64" y="-16">CPU1_C := C1</label><nail x="160" y="-40"/></transition><transition><source ref="id3"/><target ref="id1"/><label kind="guard" x="216" y="-32">flag[dep1] == 1 &amp;&amp; flag[dep2] == 1</label><label kind="synchronisation" x="216" y="0">CPU2_use!</label><label kind="assignment" x="216" y="-16">CPU2_C := C2</label><nail x="208" y="-40"/></transition></template><template><name>CPU</name><parameter>chan &amp;use, chan &amp;done, int &amp;C</parameter><declaration>// Execution time so far.
+clock x;</declaration><location id="id4" x="-8" y="40"><name x="-24" y="8">InUse</name><label kind="invariant" x="-24" y="56">x &lt;= C</label></location><location id="id5" x="-8" y="-104"><name x="-18" y="-134">Idle</name></location><init ref="id5"/><transition><source ref="id4"/><target ref="id5"/><label kind="guard" x="-120" y="-48">x == C</label><label kind="synchronisation" x="-120" y="-32">done!</label><nail x="-72" y="40"/><nail x="-72" y="-104"/></transition><transition><source ref="id5"/><target ref="id4"/><label kind="synchronisation" x="64" y="-48">use?</label><label kind="assignment" x="64" y="-32">x := 0</label><nail x="56" y="-104"/><nail x="56" y="40"/></transition></template><system>// Place template instantiations here.
+
+	// CPU
+	CPU1 = CPU(CPU1_use, CPU1_done, CPU1_C);
+	CPU2 = CPU(CPU2_use, CPU2_done, CPU2_C);
+
+	// Job
+	JobA = Job(3, 4, 1, 0, 0);
+	JobB = Job(3, 2, 2, 0, 0);
+	JobC = Job(6, 5, 3, 1, 2);
+	JobD = Job(3, 3, 4, 2, 0);
+	JobE = Job(2, 1, 5, 4, 0);
+
+// List one or more processes to be composed into a system.
+system JobA, JobB, JobC, JobD, JobE, CPU1, CPU2;</system></nta>
