@@ -1,15 +1,15 @@
 %!PS-Adobe-3.0 EPSF-3.0
-%%Title:   Template 'Buffer'.
+%%Title:   Template 'Job'.
 %%Creator: (Academic) UPPAAL 4.0.13 (rev. 4577), September 2010
 %%Pages: 0
-%%BoundingBox: -94 -46 94 78
+%%BoundingBox: -77 -60 260 124
 %%EndComments
 
 % Basic coordinate transformation.
 0.5 0.5 scale
 
 % Move the origin.
-0 65 translate
+0 129 translate
 
 % Size of graphical elements.
 /vertex-radius 12 def
@@ -68,12 +68,18 @@
 % Vertices.
 % Font used for vertex names and invariants.
 /Helvetica-Bold findfont 14 scalefont setfont
-152 -144 vertex
-   142 -128 moveto state-name-col (done) show
+186 -222 vertex
+   168 -246 moveto state-name-col (Done) show
    0 -14 moveto inv-col () show
-0 0 vertex
-   0 0 initial
-   0 -14 moveto state-name-col () show
+208 -64 vertex
+   232 -70 moveto state-name-col (RunCPU2) show
+   0 -14 moveto inv-col () show
+160 -64 vertex
+   72 -70 moveto state-name-col (RunCPU1) show
+   0 -14 moveto inv-col () show
+184 88 vertex
+   184 88 initial
+   174 104 moveto state-name-col (Ready) show
    0 -14 moveto inv-col () show
 
 % Edges.
@@ -81,53 +87,66 @@
 /Helvetica findfont 14 scalefont setfont
 newpath edge-lw setlinewidth
    trans-col
-   12.0 -0.0  moveto
-   166.0 -0.0 lineto
-   176.0 -0.0 176.0 -0.0 176.0 10.0 curveto   176.0 70.0 lineto
-   176.0 80.0 176.0 80.0 166.0 80.0 curveto   10.0 80.0 lineto
-   0.0 80.0 0.0 80.0 0.0 70.0 curveto   0.0 13.0  lineto
+   208.0 -76.0  moveto
+   208.0 -142.0 lineto
+   208.0 -152.0 208.0 -152.0 205.0017348869226 -161.53993743751514 curveto   189.8977508544922 -209.59808349609375  lineto
 stroke
 newpath edge-lw setlinewidth
    trans-col
-   2.5881905555725098 22.659257888793945   moveto
-   0.0 13.0   lineto
-   -2.5881905555725098 22.659257888793945   lineto
-stroke
-   0 -14 moveto select-col () show
-   112 50 moveto guard-col (items > 0) show
-   112 35 moveto sync-col (get?) show
-   112 20 moveto assign-col (items--) show
-newpath edge-lw setlinewidth
-   trans-col
-   -12.0 -0.0  moveto
-   -166.0 -0.0 lineto
-   -176.0 -0.0 -176.0 -0.0 -176.0 -10.0 curveto   -176.0 -78.0 lineto
-   -176.0 -88.0 -176.0 -88.0 -166.0 -88.0 curveto   -10.0 -88.0 lineto
-   0.0 -88.0 0.0 -88.0 0.0 -78.0 curveto   0.0 -13.0  lineto
-stroke
-newpath edge-lw setlinewidth
-   trans-col
-   -2.5881905555725098 -22.659257888793945   moveto
-   0.0 -13.0   lineto
-   2.5881905555725098 -22.659257888793945   lineto
-stroke
-   0 -14 moveto select-col () show
-   -168 -38 moveto guard-col (items < 3) show
-   -168 -54 moveto sync-col (put?) show
-   -168 -70 moveto assign-col (items++) show
-newpath edge-lw setlinewidth
-   trans-col
-   8.711432456970215 -8.252936363220215   moveto
-   142.5626220703125 -135.059326171875   lineto
-stroke
-newpath edge-lw setlinewidth
-   trans-col
-   137.33047485351562 -126.53732299804688   moveto
-   142.5626220703125 -135.059326171875   lineto
-   133.77044677734375 -130.2951202392578   lineto
+   195.26296997070312 -201.1592254638672   moveto
+   189.8977508544922 -209.59808349609375   lineto
+   190.32473754882812 -199.60720825195312   lineto
 stroke
    0 -14 moveto select-col () show
    0 -14 moveto guard-col () show
-   88 -70 moveto sync-col (buffer_finish?) show
-   0 -14 moveto assign-col () show
+   216 -126 moveto sync-col (CPU2_done?) show
+   216 -102 moveto assign-col (done_counter := done_counter +1, flag[jobId] = 1) show
+newpath edge-lw setlinewidth
+   trans-col
+   160.0 -76.0  moveto
+   160.0 -150.0 lineto
+   160.0 -160.0 160.0 -160.0 163.86726606780456 -169.221944109612 curveto   180.97254943847656 -210.011474609375  lineto
+stroke
+newpath edge-lw setlinewidth
+   trans-col
+   179.62387084960938 -200.10284423828125   moveto
+   180.97254943847656 -210.011474609375   lineto
+   174.85023498535156 -202.1046905517578   lineto
+stroke
+   0 -14 moveto select-col () show
+   0 -14 moveto guard-col () show
+   72 -126 moveto sync-col (CPU1_done?) show
+   -152 -102 moveto assign-col (done_counter := done_counter +1, flag[jobId] := 1) show
+newpath edge-lw setlinewidth
+   trans-col
+   178.63343811035156 77.26687622070312  moveto
+   164.47213595499957 48.94427190999916 lineto
+   160.0 40.0 160.0 40.0 160.0 30.0 curveto   160.0 -51.0  lineto
+stroke
+newpath edge-lw setlinewidth
+   trans-col
+   162.58819580078125 -41.34074401855469   moveto
+   160.0 -51.0   lineto
+   157.41180419921875 -41.34074401855469   lineto
+stroke
+   0 -14 moveto select-col () show
+   -56 18 moveto guard-col (flag[dep1] == 1 && flag[dep2] == 1) show
+   80 -30 moveto sync-col (CPU1_use!) show
+   64 -6 moveto assign-col (CPU1_C := C1) show
+newpath edge-lw setlinewidth
+   trans-col
+   189.36656188964844 77.26687622070312  moveto
+   203.52786404500043 48.94427190999916 lineto
+   208.0 40.0 208.0 40.0 208.0 30.0 curveto   208.0 -51.0  lineto
+stroke
+newpath edge-lw setlinewidth
+   trans-col
+   210.58819580078125 -41.34074401855469   moveto
+   208.0 -51.0   lineto
+   205.41180419921875 -41.34074401855469   lineto
+stroke
+   0 -14 moveto select-col () show
+   216 18 moveto guard-col (flag[dep1] == 1 && flag[dep2] == 1) show
+   216 -30 moveto sync-col (CPU2_use!) show
+   216 -6 moveto assign-col (CPU2_C := C2) show
 %%EOF

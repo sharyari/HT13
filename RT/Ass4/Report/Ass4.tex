@@ -3,6 +3,7 @@
 \usepackage[british]{babel}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath}
+\usepackage{epstopdf}
 \usepackage{amssymb}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -116,7 +117,7 @@ escapeinside={\#*}{\^^M}
 
 \section*{Part 1: Verification Warm-Up}
 
-Three automatons were modeled, and a number of questions were asked. The questions and their corresponding answers follow:
+The three automatons were modelled as specified, and verified in uppaal. The questions and their corresponding answers follow:
 
 \begin{itemize}
   \item \emph{Can the value of the variable i become strictly greater than 200?}
@@ -152,16 +153,16 @@ In this part, we scheduled a number of processes on two processors. The processo
 
 \begin{figure}[h]
   \center
-  \includegraphics{Part2Extended.eps}
+  \includegraphics{Part2Extended}
   \caption{The Job template for Part 2.}
   \label{img:part2extendedJob}
 \end{figure}
 
 The Job template consists of four states (Ready, RunCPU1, RunCPU2, Done). When we are in the ready state we can select which processor to run the job on, given that the dependencies are met. The dependency check is done against an array that keeps track of which jobs have finished. If there are no dependencies, the dependency index is set to 0 (jobs are indexed from 1), which is always 1 (true).
 
-If the dependencies are met, we set the execution time on the processor in question to the execution time of the job, and signal the CPU to start execution. This moves us to the RunCPU\# (\# = 1,2) state.
+If the dependencies are met, we set the execution time of the processor in question to the execution time of the job on that processor. To signal the processor to start execution, synchronization is used. This moves the job to the RunCPU\# (\# = 1,2) state.
 
-Once the execution is finished, we recieve the CPU\#\_done signal and increase the done\_counter (number of jobs finished) with 1, representing the finished job. We also set the done flag in the dependency vector of the current task to 1 (true), which will allow jobs that depend on our job to start. This moves the job to the Done state.
+Once the execution is finished, we receive the CPU\#\_done signal and increase the done\_counter (number of jobs finished) with 1, representing the finished job. We also set the done flag in the dependency vector of the current task to 1 (true), which will allow jobs that depend on our job to start. This moves the job to the Done state.
 
 \subsection*{Response time analysis}
 
@@ -214,18 +215,18 @@ The query was satisfied and we can therefore with certainty say that 14 is indee
 
 \section*{Part 3: Deadlock}
 
-The last part of the Lab consisted of modeling the Producer-Consumer program from Lab 1. The model for the Producer was given in the assignment. The Consumer and Buffer models were implemented by us and can be seen in Figure \ref{img:part3consumer} and Figure \ref{img:part3buffer} respectively.
+The last part of the Lab consisted of modelling the Producer-Consumer program from Lab 1. The model for the Producer was given in the assignment. The Consumer and Buffer models were implemented by us and can be seen in Figure \ref{img:part3consumer} and Figure \ref{img:part3buffer} respectively.
 
 \begin{figure}[h]
   \center
-  \includegraphics{Part3Consumer.eps}
+  \includegraphics{Part3Consumer.pdf}
   \caption{The first Consumer template for Part 3.}
   \label{img:part3consumer}
 \end{figure}
 
 \begin{figure}[h]
   \center
-  \includegraphics{Part3Buffer.eps}
+  \includegraphics{Part3Buffer.pdf}
   \caption{The first Buffer template for Part 3.}
   \label{img:part3buffer}
 \end{figure}
@@ -233,36 +234,36 @@ The last part of the Lab consisted of modeling the Producer-Consumer program fro
 This model included deadlocks, which we identified using UPPAAL. Since the Done states in the templates are by definition deadlocked states these had to be excluded since this is the expected behaviour of the program. UPPAAL includes the macro \texttt{deadlock} to use in queries, but to ignore the done states the following query was used:
 
 \begin{itemize}
-  \item[] \query{A[] (not deadlock) or (Consumer.done and Producer.done and Buffer.done}
+  \item[] \query{A[] (not deadlock)  or (Consumer.done and Producer.done and Buffer.done)}
 \end{itemize}
 
-This query allowed us to identify a real deadlock in our program, namely the case when we finish the Buffer before finishing the Producer. This means that the Producer will deadlock in the \emph{waitput} state, since there is no buffer to write to. The solution to this is to change the order in which we send the finish commands, to make sure that the Producer finishes before the Buffer.
+This query allowed us to identify a real deadlock in the program, namely the case when we finish the Buffer before finishing the Producer. This means that the Producer will deadlock in the \emph{waitput} state, since there is no buffer to write to. The solution to this is to change the order in which we send the finish commands, to make sure that the Producer finishes before the Buffer.
 
-In a perfect world, this would be the end of deadlocks in our system, however, another deadlock exists in our progam.
+In a perfect world, this would be the end of deadlocks in the system, however, another deadlock exists in the program.
 
-The second deadlock is in the state where the Consumer has consumed enough values to send the finish signals to the Producer and the Buffer, but the Producer has already chosen to try to write to the Buffer. Since the Consumer has already reached its maximum value it will not read any more items from the buffer, and the Consumer will never be able to write. This potential deadlock can be removed by removing the unneccecary \emph{waitput} state (from which we do not accept the finish signal) to make sure that we are able to recieve the finish signal in all cases that we are not in the process of writing items to the Buffer.
+The second deadlock is in the state where the Consumer has consumed enough values to send the finish signals to the Producer and the Buffer, but the Producer has already chosen to try to write to the Buffer. Since the Consumer has already reached its maximum value it will not read any more items from the buffer, and the Consumer will never be able to write. This potential deadlock can be removed by removing the unnecessary \emph{waitput} state (from which we do not accept the finish signal) to make sure that we are able to receive the finish signal in all cases that we are not in the process of writing items to the Buffer.
 
 In the same fashion, while it isn't a potential deadlock situation, the \emph{waitget} state in the Consumer is also superfluous and was also removed to keep the appearance of the templates alike. This is however only for esthetical reasons.
 
-The final Producer, Consumer and Buffer templats can be seen in Figure \ref{img:part3producerFixed}, Figure \ref{img:part3consumerFixed} and Figure \ref{img:part3bufferFixed} respectively.
+The final Producer, Consumer and Buffer templates can be seen in Figure \ref{img:part3producerFixed}, Figure \ref{i1mg:part3consumerFixed} and Figure \ref{img:part3bufferFixed} respectively.
 
 \begin{figure}[h]
   \center
-  \includegraphics{Part3ProducerFixed.eps}
+  \includegraphics{Part3ProducerFixed.pdf}
   \caption{The finished Producer template for Part 3.}
   \label{img:part3producerFixed}
 \end{figure}
 
 \begin{figure}[h]
   \center
-  \includegraphics{Part3ConsumerFixed.eps}
+  \includegraphics{Part3ConsumerFixed.pdf}
   \caption{The finished Consumer template for Part 3.}
   \label{img:part3consumerFixed}
 \end{figure}
 
 \begin{figure}[h]
   \center
-  \includegraphics{Part3BufferFixed.eps}
+  \includegraphics{Part3BufferFixed.pdf}
   \caption{The finished Buffer template for Part 3.}
   \label{img:part3bufferFixed}
 \end{figure}
