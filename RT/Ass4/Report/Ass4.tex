@@ -117,7 +117,7 @@ escapeinside={\#*}{\^^M}
 
 \section*{Part 1: Verification Warm-Up}
 
-The three automatons were modelled as specified, and verified in uppaal. The questions and their corresponding answers follow:
+The three automatons were modelled as specified, and verified in UPPAAL. The questions and their corresponding answers follow:
 
 \begin{itemize}
   \item \emph{Can the value of the variable i become strictly greater than 200?}
@@ -226,7 +226,7 @@ The last part of the Lab consisted of modelling the Producer-Consumer program fr
 
 \begin{figure}[h]
   \center
-  \includegraphics{Part3Buffer.pdf}
+  \includegraphics{Part3BufferFixed.pdf}
   \caption{The first Buffer template for Part 3.}
   \label{img:part3buffer}
 \end{figure}
@@ -245,29 +245,29 @@ The second deadlock is in the state where the Consumer has consumed enough value
 
 In the same fashion, while it isn't a potential deadlock situation, the \emph{waitget} state in the Consumer is also superfluous and was also removed to keep the appearance of the templates alike. This is however only for esthetical reasons.
 
-The final Producer, Consumer and Buffer templates can be seen in Figure \ref{img:part3producerFixed}, Figure \ref{i1mg:part3consumerFixed} and Figure \ref{img:part3bufferFixed} respectively.
+The final Producer, Consumer and Buffer templates can be seen in Figure \ref{img:part3producerFixed}, Figure \ref{img:part3consumerFixed} and Figure \ref{img:part3bufferFixed} respectively.
 
 \begin{figure}[h]
   \center
   \includegraphics{Part3ProducerFixed.pdf}
-  \caption{The finished Producer template for Part 3.}
+  \caption{The final Producer template for Part 3.}
   \label{img:part3producerFixed}
 \end{figure}
 
 \begin{figure}[h]
   \center
   \includegraphics{Part3ConsumerFixed.pdf}
-  \caption{The finished Consumer template for Part 3.}
+  \caption{The final Consumer template for Part 3.}
   \label{img:part3consumerFixed}
 \end{figure}
 
 \begin{figure}[h]
   \center
   \includegraphics{Part3BufferFixed.pdf}
-  \caption{The finished Buffer template for Part 3.}
+  \caption{The final Buffer template for Part 3.}
   \label{img:part3bufferFixed}
 \end{figure}
 
-The verification queries described above is now satisfied.
+The verification queries described above are now satisfied.
 
 \end{document}
