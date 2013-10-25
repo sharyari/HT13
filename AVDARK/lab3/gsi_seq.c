@@ -74,14 +74,14 @@ gsi_calculate()
 
         for(i = 0; i < gs_iterations && error > gs_tolerance; i++) {
                 error = sweep();
-                gs_verbose_printf("Iteration: %i, Error: %f\n", i, error);
+                printf("Iteration: %i, Error: %f\n", i, error);
         }
 
         if (error <= gs_tolerance)
                 printf("Solution converged after %i iterations.\n", i);
         else
                 printf("Reached maximum number of iterations. Solution did "
-                       "NOT converge.\n");
+                       "NOT converge.\n Error was %f and tolerance was %f", error, gs_tolerance);
 }
 
 /*

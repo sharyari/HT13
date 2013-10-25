@@ -9,12 +9,12 @@ CC=gcc
 CFLAGS=-std=c99 -D_XOPEN_SOURCE=600 -O3 -Wall -Werror
 LDFLAGS=
 LIBS=-lm -lrt
-TMP_PREFIX=/var/tmp/$$USER.
+TMP_PREFIX=./$$USER.
 
 all: gs_seq gs_pth
 
 gs_pth: gs_common.o gsi_pth.o timing.o
-	$(CC) $(LDFLAGS) -lpthread -o $@ $^ $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ $^ -lpthread $(LIBS)
 
 gs_seq: gs_common.o gsi_seq.o timing.o
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
@@ -36,10 +36,10 @@ test: gs_seq gs_pth
 	@if diff -q "$(TMP_PREFIX)gs_seq.test.out" \
 		    "$(TMP_PREFIX)gs_pth.test.out" >/dev/null; then	\
 		echo 'OK';						\
-		rm -f $(TMP_PREFIX)*.test.out;				\
+#		rm -f $(TMP_PREFIX)*.test.out;				\
 	else								\
 		echo 'MISMATCH';					\
-		rm -f $(TMP_PREFIX)*.test.out;				\
+#		rm -f $(TMP_PREFIX)*.test.out;				\
 		exit 1;							\
 	fi
 

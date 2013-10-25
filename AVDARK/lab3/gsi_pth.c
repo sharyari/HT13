@@ -29,10 +29,11 @@ const int gsi_is_parallel = 1;
 typedef struct {
         int thread_id;
         pthread_t thread;
-
+      
         volatile double error;
 
         /* TASK: Do you need any thread local state for synchronization? */
+        volatile int c_row; // This int indicates which row in the matrix the thread is in
 } thread_info_t;
 
 /** Define to enable debug mode */
@@ -49,6 +50,7 @@ thread_info_t *threads = NULL;
 /** The global error for the last iteration */
 static double global_error;
 
+pthread_barrier_t barrier;
 
 void
 gsi_init()
@@ -67,6 +69,9 @@ gsi_init()
         global_error = gs_tolerance + 1;
 
         /* TASK: Initialize global variables here */
+	for (int i=0;i<gs_nthreads;i++)
+		threads[i].c_row = 0;
+	pthread_barrier_init(&barrier,NULL,gs_nthreads);
 }
 
 void
@@ -80,13 +85,14 @@ gsi_finish()
 
         if (threads)
                 free(threads);
+
+	pthread_barrier_destroy(&barrier);
 }
 
 static void
 thread_sweep(int tid, int iter, int lbound, int rbound)
 {
         threads[tid].error = 0.0;
-
         for (int row = 1; row < gs_size - 1; row++) {
                 dprintf("%d: checking wait condition\n"
                         "\titeration: %i, row: %i\n",
@@ -95,6 +101,9 @@ thread_sweep(int tid, int iter, int lbound, int rbound)
 
                 /* TASK: Wait for data to be available from the thread
                  * to the left */
+                while ( tid != 0 && threads[tid-1].c_row <= threads[tid].c_row+1) {
+			continue;
+                }
 
                 dprintf("%d: Starting on row: %d\n", tid, row);
 
@@ -112,10 +121,11 @@ thread_sweep(int tid, int iter, int lbound, int rbound)
 
                 /* TASK: Tell the thread to the right that this thread
                  * is done */
+		threads[tid].c_row++;
 
                 dprintf("%d: row %d done\n", tid, row);
         }
-
+	threads[tid].c_row++;
 }
 
 /**
@@ -127,13 +137,18 @@ thread_compute(void *_self)
         thread_info_t *self = (thread_info_t *)_self;
         const int tid = self->thread_id;
 
-        int lbound, rbound;
-
         /* TASK: Compute bounds for this thread */
+
+        int lbound = (gs_size/gs_nthreads)*tid;
+	int rbound = lbound + gs_size/gs_nthreads;
+	if (tid == 0)
+		lbound++;
+	if (tid == gs_nthreads-1)
+		rbound--;
 
         gs_verbose_printf("%i: lbound: %i, rbound: %i\n",
                           tid, lbound, rbound);
-
+        
         for (int iter = 0;
              iter < gs_iterations && global_error > gs_tolerance;
              iter++) {
@@ -148,9 +163,17 @@ thread_compute(void *_self)
                 /* Hint: Which thread is guaranteed to complete its
                  * sweep last? */
 
+		if(tid == (gs_nthreads - 1)) {
+			// Update global error, since we are the last to finish.
+			global_error = 0;
+			for (int i=0;i<gs_nthreads;i++)
+				global_error+=threads[i].error;
+			printf("%f\n", global_error);
+		}
                 dprintf("%d: iteration %d done\n", tid, iter);
-
                 /* TASK: Iteration barrier */
+		pthread_barrier_wait(&barrier);
+		threads[tid].c_row = 0;
         }
 
         gs_verbose_printf(
