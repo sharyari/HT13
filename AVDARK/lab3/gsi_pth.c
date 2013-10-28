@@ -168,12 +168,12 @@ thread_compute(void *_self)
 			global_error = 0;
 			for (int i=0;i<gs_nthreads;i++)
 				global_error+=threads[i].error;
-			printf("%f\n", global_error);
 		}
                 dprintf("%d: iteration %d done\n", tid, iter);
                 /* TASK: Iteration barrier */
 		pthread_barrier_wait(&barrier);
 		threads[tid].c_row = 0;
+		pthread_barrier_wait(&barrier);
         }
 
         gs_verbose_printf(

@@ -1,4 +1,4 @@
-/**
+/*
  * Sequential Gauss-Seidel implementation.
  *
  * Course: Advanced Computer Architecture, Uppsala University
@@ -74,7 +74,6 @@ gsi_calculate()
 
         for(i = 0; i < gs_iterations && error > gs_tolerance; i++) {
                 error = sweep();
-                printf("Iteration: %i, Error: %f\n", i, error);
         }
 
         if (error <= gs_tolerance)

@@ -23,23 +23,23 @@ test: gs_seq gs_pth
 	@echo '**********************************************************************'
 	@echo 'Starting sequential reference run...'
 	@echo '**********************************************************************'
-	./gs_seq -s 512 -o $(TMP_PREFIX)gs_seq.test.out
+	./gs_seq -s 512 -i 100 -o $(TMP_PREFIX)gs_seq.test.out
 	@echo
 
 	@echo '**********************************************************************'
 	@echo 'Starting parallel run...'
 	@echo '**********************************************************************'
-	./gs_pth -s 512 -o $(TMP_PREFIX)gs_pth.test.out
+	./gs_pth -s 512 -i 100 -o $(TMP_PREFIX)gs_pth.test.out
 	@echo
 
 	@echo "Test results: "
 	@if diff -q "$(TMP_PREFIX)gs_seq.test.out" \
 		    "$(TMP_PREFIX)gs_pth.test.out" >/dev/null; then	\
 		echo 'OK';						\
-#		rm -f $(TMP_PREFIX)*.test.out;				\
+		rm -f $(TMP_PREFIX)*.test.out;				\
 	else								\
 		echo 'MISMATCH';					\
-#		rm -f $(TMP_PREFIX)*.test.out;				\
+		rm -f $(TMP_PREFIX)*.test.out;				\
 		exit 1;							\
 	fi
 
