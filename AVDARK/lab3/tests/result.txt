@@ -1,0 +1,300 @@
+Threads: 16   run:  10
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.912257 s
+*****************
+Threads: 16   run:  1
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.845958 s
+*****************
+Threads: 16   run:  2
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.852317 s
+*****************
+Threads: 16   run:  3
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.873083 s
+*****************
+Threads: 16   run:  4
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.883753 s
+*****************
+Threads: 16   run:  5
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.818465 s
+*****************
+Threads: 16   run:  6
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.985550 s
+*****************
+Threads: 16   run:  7
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.907933 s
+*****************
+Threads: 16   run:  8
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.910352 s
+*****************
+Threads: 16   run:  9
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.866185 s
+*****************
+Threads: 1   run:  10
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 1.240779 s
+*****************
+Threads: 1   run:  1
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 1.239603 s
+*****************
+Threads: 1   run:  2
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 1.237143 s
+*****************
+Threads: 1   run:  3
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 1.253039 s
+*****************
+Threads: 1   run:  4
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 1.247495 s
+*****************
+Threads: 1   run:  5
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 1.239781 s
+*****************
+Threads: 1   run:  6
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 1.255256 s
+*****************
+Threads: 1   run:  7
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 1.239243 s
+*****************
+Threads: 1   run:  8
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 1.238627 s
+*****************
+Threads: 1   run:  9
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 1.240291 s
+*****************
+Threads: 2   run:  10
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.644946 s
+*****************
+Threads: 2   run:  1
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.652012 s
+*****************
+Threads: 2   run:  2
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.648454 s
+*****************
+Threads: 2   run:  3
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.641850 s
+*****************
+Threads: 2   run:  4
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.649865 s
+*****************
+Threads: 2   run:  5
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.639170 s
+*****************
+Threads: 2   run:  6
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.640350 s
+*****************
+Threads: 2   run:  7
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.645838 s
+*****************
+Threads: 2   run:  8
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.651376 s
+*****************
+Threads: 2   run:  9
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.638053 s
+*****************
+Threads: 4   run:  10
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.510340 s
+*****************
+Threads: 4   run:  1
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.511315 s
+*****************
+Threads: 4   run:  2
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.502971 s
+*****************
+Threads: 4   run:  3
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.505466 s
+*****************
+Threads: 4   run:  4
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.504388 s
+*****************
+Threads: 4   run:  5
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.506357 s
+*****************
+Threads: 4   run:  6
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.506166 s
+*****************
+Threads: 4   run:  7
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.507510 s
+*****************
+Threads: 4   run:  8
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.508675 s
+*****************
+Threads: 4   run:  9
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.505900 s
+*****************
+Threads: 8   run:  10
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.543753 s
+*****************
+Threads: 8   run:  1
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.545504 s
+*****************
+Threads: 8   run:  2
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.539482 s
+*****************
+Threads: 8   run:  3
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.547599 s
+*****************
+Threads: 8   run:  4
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.546596 s
+*****************
+Threads: 8   run:  5
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.544481 s
+*****************
+Threads: 8   run:  6
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.545028 s
+*****************
+Threads: 8   run:  7
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.531247 s
+*****************
+Threads: 8   run:  8
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.538687 s
+*****************
+Threads: 8   run:  9
+Solution did NOT converge.
+Note: This is normal if you are using the default settings.
+**** Summary ****
+   Execution time: 0.535941 s
+*****************

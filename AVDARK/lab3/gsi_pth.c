@@ -34,6 +34,7 @@ typedef struct {
 
         /* TASK: Do you need any thread local state for synchronization? */
         volatile int c_row; // This int indicates which row in the matrix the thread is in
+		double padding[6]; // unused data to avoid false sharing.
 } thread_info_t;
 
 /** Define to enable debug mode */
