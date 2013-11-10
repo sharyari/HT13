@@ -72,6 +72,7 @@ static float mat_ref[SIZE][SIZE] __attribute__((aligned (XMM_ALIGNMENT_BYTES)));
 static inline void
 matmul_block_sse(int i, int j, int k)
 {
+        printf("%d,%d,%d",i,j,k);
         /* BONUS TASK: Implement your SSE 4x4 matrix multiplication
          * block here. */
         /* HINT: You might find at least the following instructions
@@ -259,6 +260,19 @@ matmul_sse()
         /* TASK: Implement your simple matrix multiplication using SSE
          * here.
          */
+        static float mat_b_tr[SIZE][SIZE] __attribute__((aligned (XMM_ALIGNMENT_BYTES)));
+
+        for (i=0;i<SIZE;i++){
+                for (k=0;k<SIZE;k++) {
+                        __m128 m = _mm_set1_ps(mat_a[i][k]);
+                        for (j=0;j<SIZE;j+=4){
+                                __m128 n = _mm_load_ps(mat_b[k]+j);
+                                _mm_store_ps(mat_c[i]+j,
+                                             _mm_add_ps(_mm_load_ps(mat_c[i]+j),
+                                                       _mm_mul_ps(m, n)));
+                       }
+                }
+        }
 }
 
 #else

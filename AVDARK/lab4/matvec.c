@@ -70,7 +70,9 @@ matvec_sse()
                 }
         }
 
-        // Can be sped up by unrolling one more time so we can write four items at a time.
+        // Can be sped up by unrolling one more time so we can write four items at a time,
+        // This also means that we do not have to zero-pad for the hadd, but get four
+        // valuable results at a time.
 }
 
 /**
