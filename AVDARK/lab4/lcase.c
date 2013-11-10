@@ -155,6 +155,11 @@ lcase_sse_simple(char *restrict dst, const char *restrict src, size_t len)
          * LOAD_SI128/STORE_SI128 macros. See lcase_ref_simple() for a
          * reference implementation.
          */
+        for (int i = 0; i < len; i += 16) {
+                __m128i v = LOAD_SI128((__m128i *)(src+i));
+                STORE_SI128((__m128i *)(dst+i), _mm_or_si128(v, _mm_set1_epi8(0x20)));
+        }
+
         /* HINT: Check out the documentation for the following:
          *  - _mm_set1_epi8
          *  - _mm_or_si128 (the por instruction)
@@ -176,6 +181,14 @@ lcase_sse_cond(char *restrict dst, const char *restrict src, size_t len)
          *  - _mm_cmpgt_epi8 (the pcmpgtb instruction)
          *  - _mm_and_si128 (the pand instruction)
          */
+        for (int i = 0; i < len; i += 16) {
+                __m128i v = LOAD_SI128((__m128i *)(src+i));
+                __m128i X = _mm_set1_epi8(0x20);
+                X = _mm_and_si128(X, _mm_cmpgt_epi8(v, _mm_set1_epi8('A'-1)));
+                X = _mm_and_si128(X,_mm_cmplt_epi8(v, _mm_set1_epi8('Z'+1)));
+                STORE_SI128((__m128i *)(dst+i), _mm_or_si128(v, X));
+        }
+
 }
 
 static char *
@@ -185,7 +198,7 @@ generate_test_data(size_t len)
         int i = 0;
 
         data = my_malloc(len);
-
+        srand48(59);
         /* TODO: We should initiate the random seed */
         for (; i + 4 <= len; i += 4)
                 *(int32_t *)(data + i) = (int32_t)mrand48();
@@ -259,6 +272,8 @@ main(int argc, char *argv[])
         run_tests(in, len,
                   lcase_ref_cond, ref,
                   lcase_sse_cond, out);
+
+        printf("Size of INT: %d", (int)sizeof(argc));
 
         my_free(in);
         my_free(out);
