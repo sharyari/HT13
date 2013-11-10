@@ -56,6 +56,21 @@ matvec_sse()
          * HINT: You can create the sum of all elements in a vector
          * using two hadd instructions.
          */
+
+        float sum[] = {0.0, 0.0, 0.0, 0.0};
+        for (int rad = 0; rad < SIZE; rad++) {
+                vec_c[rad] = 0.0;
+                for (int col=0; col < SIZE; col += 4) {
+                        __m128 cur_vec =_mm_load_ps(vec_b + col);
+                        __m128 cur_mat = _mm_load_ps(mat_a + (rad * SIZE) + col);
+                        __m128 prod = _mm_mul_ps(cur_vec, cur_mat);
+                        __m128 tsum = _mm_hadd_ps(prod, _mm_setzero_ps());
+                        //      sum[rad%4] += _mm_cvtss_f32(_mm_hadd_ps(tsum, _mm_setzero_ps()));
+                        vec_c[rad] += _mm_cvtss_f32(_mm_hadd_ps(tsum, _mm_setzero_ps()));
+                }
+        }
+
+        // Can be sped up by unrolling one more time so we can write four items at a time.
 }
 
 /**
