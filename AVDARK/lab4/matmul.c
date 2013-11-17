@@ -72,7 +72,8 @@ static float mat_ref[SIZE][SIZE] __attribute__((aligned (XMM_ALIGNMENT_BYTES)));
 static inline void
 matmul_block_sse(int i, int j, int k)
 {
-        printf("%d,%d,%d",i,j,k);
+		int B = 4;
+    //    printf("%d,%d,%d",i,j,k);
         /* BONUS TASK: Implement your SSE 4x4 matrix multiplication
          * block here. */
         /* HINT: You might find at least the following instructions
@@ -84,6 +85,50 @@ matmul_block_sse(int i, int j, int k)
          * parameter can be used to restrict to which elements the
          * result is stored, all other elements are set to zero.
          */
+		__m128 n1 = _mm_load_ps(mat_a[i]+k);
+		__m128 n2 = _mm_load_ps(mat_a[i+1]+k);
+		__m128 n3 = _mm_load_ps(mat_a[i+2]+k);
+		__m128 n4 = _mm_load_ps(mat_a[i+3]+k);
+
+		__m128 m1 = _mm_load_ps(mat_b[k]+j);
+		__m128 m2 = _mm_load_ps(mat_b[k+1]+j);
+		__m128 m3 = _mm_load_ps(mat_b[k+2]+j);
+		__m128 m4 = _mm_load_ps(mat_b[k+3]+j);
+
+		_MM_TRANSPOSE4_PS (m1,m2,m3,m4);
+		int M = 0xF1;
+		__m128 r11 = _mm_dp_ps(n1, m1, M);
+		__m128 r12 = _mm_dp_ps(n1, m2, M);
+		__m128 r13 = _mm_dp_ps(n1, m3, M);
+		__m128 r14 = _mm_dp_ps(n1, m4, M);
+		__m128 r21 = _mm_dp_ps(n2, m1, M);
+		__m128 r22 = _mm_dp_ps(n2, m2, M);
+		__m128 r23 = _mm_dp_ps(n2, m3, M);
+		__m128 r24 = _mm_dp_ps(n2, m4, M);
+		__m128 r31 = _mm_dp_ps(n3, m1, M);
+		__m128 r32 = _mm_dp_ps(n3, m2, M);
+		__m128 r33 = _mm_dp_ps(n3, m3, M);
+		__m128 r34 = _mm_dp_ps(n3, m4, M);
+		__m128 r41 = _mm_dp_ps(n4, m1, M);
+		__m128 r42 = _mm_dp_ps(n4, m2, M);
+		__m128 r43 = _mm_dp_ps(n4, m3, M);
+		__m128 r44 = _mm_dp_ps(n4, m4, M);
+
+
+		_MM_TRANSPOSE4_PS (r11,r12,r13,r14);
+		_MM_TRANSPOSE4_PS (r21,r22,r23,r24);
+		_MM_TRANSPOSE4_PS (r31,r32,r33,r34);
+		_MM_TRANSPOSE4_PS (r41,r42,r43,r44);
+
+		_mm_store_ps(mat_c[i]+j, _mm_add_ps(
+			_mm_load_ps(mat_c[i]+j), r11));
+		_mm_store_ps(mat_c[i+1]+j, _mm_add_ps(
+			_mm_load_ps(mat_c[i+1]+j), r21));
+		_mm_store_ps(mat_c[i+2]+j, _mm_add_ps(
+			_mm_load_ps(mat_c[i+2]+j), r31));
+		_mm_store_ps(mat_c[i+3]+j, _mm_add_ps(
+			_mm_load_ps(mat_c[i+3]+j), r41));
+
 }
 #elif MODE == MODE_BLOCKED
 /**
